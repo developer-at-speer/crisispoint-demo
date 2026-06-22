@@ -20,16 +20,25 @@ export function TriStateRadio({
   onChange,
   className,
 }: TriStateRadioProps) {
+  const labelId = `${id ?? name}-label`;
+
   return (
-    <fieldset
+    <div
       id={id}
-      className={`form-question m-0 space-y-2 border-0 p-0 ${className ?? ""}`.trim()}
+      role="group"
+      aria-labelledby={labelId}
+      className={`form-question space-y-2 ${className ?? ""}`.trim()}
     >
-      <legend className="text-sm font-medium text-slate-700">{label}</legend>
+      <div
+        id={labelId}
+        className="form-question-label text-sm font-medium text-slate-700"
+      >
+        {label}
+      </div>
       <div
         role="radiogroup"
         aria-label={label}
-        className="flex flex-wrap gap-4"
+        className="flex flex-wrap gap-x-4 gap-y-2"
       >
         {options.map((opt) => {
           const selected = value === opt.value;
@@ -77,6 +86,6 @@ export function TriStateRadio({
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }

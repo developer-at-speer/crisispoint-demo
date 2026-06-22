@@ -75,23 +75,29 @@ export function LocationAutocomplete({
   }, [value]);
 
   return (
-    <div className="relative">
-      <MapPin
-        className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${
-          placesReady ? "text-brand-accent" : "text-slate-400"
-        }`}
-        aria-hidden
-      />
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        defaultValue={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete="off"
-        className={`w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent ${className}`}
-      />
+    <div>
+      <div className="relative">
+        <span
+          className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center"
+          aria-hidden
+        >
+          <MapPin
+            className={`h-4 w-4 ${
+              placesReady ? "text-brand-accent" : "text-slate-400"
+            }`}
+          />
+        </span>
+        <input
+          ref={inputRef}
+          id={id}
+          type="text"
+          defaultValue={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete="off"
+          className={`w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent ${className}`}
+        />
+      </div>
       {hasApiKey && placesReady && (
         <p className="mt-1 text-xs text-slate-500">
           Start typing for Ontario address suggestions

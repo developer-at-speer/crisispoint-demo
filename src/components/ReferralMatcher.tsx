@@ -45,13 +45,15 @@ export function ReferralMatcher({
         )}
 
         <div className="relative mt-3">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <span className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center">
+            <Search className="h-4 w-4 text-slate-400" />
+          </span>
           <input
             type="search"
             placeholder="Search resources..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            className="w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
       </div>

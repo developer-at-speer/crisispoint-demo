@@ -39,6 +39,7 @@ export function IntakePage() {
     setConsentHighlight,
     incomingCallVisible,
     setIncomingCallVisible,
+    acceptCall,
     addActivityEvent,
   } = useCase();
 
@@ -239,7 +240,7 @@ export function IntakePage() {
 
       <IncomingCallModal
         visible={incomingCallVisible}
-        onAnswer={() => setIncomingCallVisible(false)}
+        onAnswer={acceptCall}
         onDismiss={() => setIncomingCallVisible(false)}
       />
     </>

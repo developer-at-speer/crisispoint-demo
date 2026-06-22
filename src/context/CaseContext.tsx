@@ -2,12 +2,14 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { trackingIds } from "../data/agencies";
 import { CASE_NUMBER, initialState } from "../data/constants";
+import { formatCallDuration } from "../lib/callTimer";
 import type { ActivityEvent } from "../types/activity";
 import type { Attachment } from "../types/attachments";
 import type { IntakeState, SendState } from "../types/intake";
@@ -63,6 +65,10 @@ interface CaseContextValue {
   setConsentHighlight: React.Dispatch<React.SetStateAction<boolean>>;
   incomingCallVisible: boolean;
   setIncomingCallVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  callActive: boolean;
+  callDurationSeconds: number;
+  acceptCall: () => void;
+  endCall: () => void;
   activityEvents: ActivityEvent[];
   addActivityEvent: (event: Omit<ActivityEvent, "id">) => void;
   messages: CaseMessage[];
@@ -86,6 +92,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [consentWarning, setConsentWarning] = useState(false);
   const [consentHighlight, setConsentHighlight] = useState(false);
   const [incomingCallVisible, setIncomingCallVisible] = useState(true);
+  const [callActive, setCallActive] = useState(false);
+  const [callDurationSeconds, setCallDurationSeconds] = useState(0);
   const [activityEvents, setActivityEvents] = useState(initialActivity);
   const [messages, setMessages] = useState(initialMessages);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -125,6 +133,51 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const removeFromQueue = useCallback((agencyId: string) => {
     setReferralQueue((prev) => prev.filter((id) => id !== agencyId));
   }, []);
+
+  useEffect(() => {
+    if (!callActive) {
+      setCallDurationSeconds(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setCallDurationSeconds((seconds) => seconds + 1);
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [callActive]);
+
+  const acceptCall = useCallback(() => {
+    setIncomingCallVisible(false);
+    setCallActive(true);
+    setCallDurationSeconds(0);
+    addActivityEvent({
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+      type: "case_created",
+      title: "Call answered",
+      description: `Active session started for Case #${CASE_NUMBER}.`,
+      actor: "Operator",
+    });
+  }, [addActivityEvent]);
+
+  const endCall = useCallback(() => {
+    const duration = formatCallDuration(callDurationSeconds);
+    setCallActive(false);
+    setCallDurationSeconds(0);
+    addActivityEvent({
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+      type: "note_added",
+      title: "Call ended",
+      description: `Active session closed for Case #${CASE_NUMBER} after ${duration}.`,
+      actor: "Operator",
+    });
+  }, [addActivityEvent, callDurationSeconds]);
 
   const addMessage = useCallback(
     (body: string, channel: "internal" | "agency" = "internal") => {
@@ -193,6 +246,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setConsentHighlight,
       incomingCallVisible,
       setIncomingCallVisible,
+      callActive,
+      callDurationSeconds,
+      acceptCall,
+      endCall,
       activityEvents,
       addActivityEvent,
       messages,
@@ -209,6 +266,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       consentWarning,
       consentHighlight,
       incomingCallVisible,
+      callActive,
+      callDurationSeconds,
+      acceptCall,
+      endCall,
       activityEvents,
       addActivityEvent,
       messages,

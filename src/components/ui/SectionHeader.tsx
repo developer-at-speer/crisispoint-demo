@@ -16,7 +16,7 @@ export function SectionHeader({
   };
 
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-3 border-b border-slate-200 pb-4">
+    <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-200 pb-3">
       <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
       <span
         className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tierStyles[tierVariant]}`}

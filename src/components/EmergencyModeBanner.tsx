@@ -11,13 +11,12 @@ export function EmergencyModeBanner({
 }: EmergencyModeBannerProps) {
   return (
     <motion.div
-      layout
       animate={{
         backgroundColor: emergencyMode ? "#fff1f2" : "#ffffff",
         borderColor: emergencyMode ? "#ef4444" : "#d1d5db",
       }}
       transition={{ duration: 0.2 }}
-      className="form-question sticky top-0 z-10 mb-6 flex items-center justify-between rounded-xl border p-5 shadow-sm"
+      className="flex shrink-0 items-center justify-between gap-4 rounded-xl border bg-white p-5"
     >
       <div>
         <h2

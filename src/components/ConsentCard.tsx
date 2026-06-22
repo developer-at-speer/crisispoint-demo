@@ -44,7 +44,7 @@ export function ConsentCard({
   return (
     <motion.div
       id="consent"
-      className={`form-question rounded-xl border-2 p-4${highlighted ? " field-highlight" : ""}`}
+      className={`rounded-xl border-2 p-5 shadow-sm${highlighted ? " field-highlight" : ""}`}
       animate={{
         borderColor: config.borderColor,
         backgroundColor: config.backgroundColor,
@@ -54,30 +54,32 @@ export function ConsentCard({
       }}
       transition={{ duration: 0.2 }}
     >
-      <div className="mb-3 flex items-start gap-2">
+      <div className="mb-5 flex items-start gap-3">
         {config.showWarning && (
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
         )}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900">{config.title}</h3>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold leading-snug text-slate-900">
+            {config.title}
+          </h3>
           <motion.p
             key={consentStatus}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className="mt-1 text-sm text-slate-600"
+            className="mt-2 text-sm leading-relaxed text-slate-600"
           >
             {config.body}
           </motion.p>
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
           type="button"
           aria-pressed={consentStatus === "granted"}
           onClick={() => onConsentChange("granted")}
-          className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+          className={`flex-1 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${
             consentStatus === "granted"
               ? "bg-green-600 text-white"
               : "border border-green-600 bg-white text-green-700 hover:bg-green-50"
@@ -89,7 +91,7 @@ export function ConsentCard({
           type="button"
           aria-pressed={consentStatus === "declined"}
           onClick={() => onConsentChange("declined")}
-          className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+          className={`flex-1 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${
             consentStatus === "declined"
               ? "bg-blue-600 text-white"
               : "border border-red-400 bg-white text-red-600 hover:bg-red-50"

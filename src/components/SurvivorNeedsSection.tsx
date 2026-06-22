@@ -40,7 +40,7 @@ export function SurvivorNeedsSection({
   ] as const;
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <SectionHeader
         title="Survivor details & service needs"
         tier="Tier 1 · fast path"
@@ -53,7 +53,7 @@ export function SurvivorNeedsSection({
         >
           <label
             htmlFor="preferred-name"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-2.5 block text-sm font-medium text-slate-700"
           >
             Name (first or preferred name is fine)
           </label>
@@ -64,7 +64,7 @@ export function SurvivorNeedsSection({
             onChange={(e) =>
               onChange({ ...survivorNeeds, preferredName: e.target.value })
             }
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
+            className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
           />
         </div>
 
@@ -74,7 +74,7 @@ export function SurvivorNeedsSection({
         >
           <label
             htmlFor="location-input"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-2.5 block text-sm font-medium text-slate-700"
           >
             General location / area
           </label>
@@ -92,11 +92,11 @@ export function SurvivorNeedsSection({
           id="serviceTypes"
           className={questionClasses(highlightedField === "serviceTypes")}
         >
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
+          <label className="mb-2.5 block text-sm font-medium text-slate-700">
             Service type(s)
           </label>
-          <div className="relative">
-            <div className="flex min-h-[42px] w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2">
+          <div className="relative z-10">
+            <div className="flex min-h-[44px] w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2.5">
               <div className="flex flex-1 flex-wrap gap-1.5">
                 {survivorNeeds.serviceTypes.length === 0 ? (
                   <span className="text-sm text-slate-400">Select service types</span>
@@ -123,13 +123,13 @@ export function SurvivorNeedsSection({
                 type="button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 aria-label="Open service type menu"
-                className="ml-2 shrink-0 text-slate-400"
+                className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-50"
               >
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
             {dropdownOpen && (
-              <div className="absolute z-20 mt-1 w-full rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+              <div className="absolute z-30 mt-2 w-full rounded-md border border-slate-200 bg-white py-1 shadow-lg">
                 {SERVICE_TYPE_OPTIONS.map((type) => (
                   <button
                     key={type}
@@ -149,10 +149,17 @@ export function SurvivorNeedsSection({
           </div>
         </div>
 
-        <fieldset className="form-question m-0 border-0 p-0">
-          <legend className="mb-2 text-sm font-medium text-slate-700">
+        <div
+          role="group"
+          aria-labelledby="service-preference-label"
+          className="form-question space-y-2"
+        >
+          <div
+            id="service-preference-label"
+            className="form-question-label text-sm font-medium text-slate-700"
+          >
             Service preference
-          </legend>
+          </div>
           <div role="radiogroup" className="flex flex-wrap gap-4">
             {preferenceOptions.map((opt) => {
               const selected = survivorNeeds.servicePreference === opt.value;
@@ -203,12 +210,19 @@ export function SurvivorNeedsSection({
               );
             })}
           </div>
-        </fieldset>
+        </div>
 
-        <fieldset className="form-question m-0 border-0 p-0">
-          <legend className="mb-2 text-sm font-medium text-slate-700">
+        <div
+          role="group"
+          aria-labelledby="needs-apply-label"
+          className="form-question space-y-2"
+        >
+          <div
+            id="needs-apply-label"
+            className="form-question-label text-sm font-medium text-slate-700"
+          >
             Any of these apply?
-          </legend>
+          </div>
           <div className="flex flex-wrap gap-4">
             {NEED_OPTIONS.map((opt) => {
               const selected = survivorNeeds.needs.includes(opt.id);
@@ -253,7 +267,7 @@ export function SurvivorNeedsSection({
               );
             })}
           </div>
-        </fieldset>
+        </div>
       </div>
     </section>
   );

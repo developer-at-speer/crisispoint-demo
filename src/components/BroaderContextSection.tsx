@@ -20,7 +20,7 @@ export function BroaderContextSection({
   highlightedField,
 }: BroaderContextSectionProps) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm opacity-90">
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm opacity-90">
       <SectionHeader
         title="Broader context"
         tier="Tier 3 · only if appropriate"

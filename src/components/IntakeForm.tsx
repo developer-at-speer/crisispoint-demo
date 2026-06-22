@@ -25,13 +25,15 @@ export function IntakeForm({
   };
 
   return (
-    <div className="p-6">
-      <EmergencyModeBanner
-        emergencyMode={intake.emergencyMode}
-        onToggle={onToggleEmergency}
-      />
+    <div className="flex flex-col gap-5 p-5">
+      <div className="shrink-0">
+        <EmergencyModeBanner
+          emergencyMode={intake.emergencyMode}
+          onToggle={onToggleEmergency}
+        />
+      </div>
 
-      <div className="space-y-6">
+      <div className="flex flex-col gap-5">
         <SafetySection
           safety={intake.safety}
           onChange={(safety) => update({ safety })}
@@ -52,7 +54,7 @@ export function IntakeForm({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={transitions.slow}
-              className="space-y-6 overflow-hidden"
+              className="space-y-5 overflow-hidden"
             >
               <IncidentDetailsSection
                 incidentDetails={intake.incidentDetails}
