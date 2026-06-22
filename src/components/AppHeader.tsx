@@ -19,21 +19,12 @@ function CrisisPointMark() {
 }
 
 function OperatorAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(/[\s._-]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-
   return (
-    <div
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-200 to-purple-400 text-xs font-bold text-brand"
-      aria-label={`${name} profile`}
-      role="img"
-    >
-      {initials || "OP"}
-    </div>
+    <img
+      src="/operator-avatar.png"
+      alt={`${name} profile`}
+      className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30"
+    />
   );
 }
 
