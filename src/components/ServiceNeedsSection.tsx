@@ -48,7 +48,7 @@ export function ServiceNeedsSection({
       id={INTAKE_SECTION_IDS.serviceNeeds}
       className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
     >
-      <SectionHeader title="Service needs" tier="Tier 1 · fast path" />
+      <SectionHeader title="Service needs" tier="Tier 1 · fast path" tierVariant="fastPath" />
 
       <div className="space-y-6">
         <div

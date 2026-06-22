@@ -15,7 +15,7 @@ const copyConfig = {
     title: "Consent to share identifiable information with service(s)",
     body: "Does the survivor consent to share identifiable information with receiving service(s)?",
     icon: AlertTriangle,
-    iconClass: "bg-amber-100 text-amber-700",
+    iconClass: "bg-orange-500 text-white",
     titleClass: "text-slate-900",
     bodyClass: "text-slate-600",
   },
@@ -84,7 +84,9 @@ export function ConsentCard({
           className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
             consentStatus === "granted"
               ? "bg-green-600 text-white"
-              : "border border-green-500 bg-white text-green-700 hover:bg-green-50"
+              : consentStatus === "unknown"
+                ? "border border-green-500 bg-green-50 text-green-700 hover:bg-green-100"
+                : "border border-green-500 bg-white text-green-700 hover:bg-green-50"
           }`}
         >
           Granted
@@ -96,7 +98,9 @@ export function ConsentCard({
           className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
             consentStatus === "declined"
               ? "bg-red-600 text-white"
-              : "border border-red-500 bg-white text-red-700 hover:bg-red-50"
+              : consentStatus === "unknown"
+                ? "border border-red-500 bg-red-50 text-red-700 hover:bg-red-100"
+                : "border border-red-500 bg-white text-red-700 hover:bg-red-50"
           }`}
         >
           Declined

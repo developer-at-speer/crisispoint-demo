@@ -32,7 +32,7 @@ export function IntakeForm({
     <div className="flex flex-col">
       <div
         id="intake-sticky-header"
-        className="sticky top-0 z-20 bg-page px-5 pb-5 pt-5 shadow-sm"
+        className="sticky top-0 z-20 bg-page px-5 pb-4 pt-4"
       >
         <EmergencyModeBanner
           emergencyMode={intake.emergencyMode}

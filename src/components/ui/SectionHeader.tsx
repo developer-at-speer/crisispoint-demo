@@ -1,33 +1,19 @@
-import type { ConsentStatus } from "../../types/intake";
-
 interface SectionHeaderProps {
   title: string;
   tier: string;
-  tierVariant?: "urgent" | "normal" | "muted";
-  sharingStatus?: ConsentStatus;
+  tierVariant?: "urgent" | "fastPath" | "normal" | "muted";
   headerTintClass?: string;
 }
-
-const sharingStatusConfig = {
-  granted: {
-    message: "This information will be shared",
-    className: "text-sm font-semibold text-green-700",
-  },
-  declined: {
-    message: "This information won't be shared",
-    className: "text-sm font-semibold text-red-700",
-  },
-};
 
 export function SectionHeader({
   title,
   tier,
   tierVariant = "normal",
-  sharingStatus,
   headerTintClass = "border-slate-200 bg-white",
 }: SectionHeaderProps) {
   const tierStyles = {
     urgent: "bg-red-50 text-red-700 border-red-100",
+    fastPath: "bg-green-50 text-green-700 border-green-200",
     normal: "bg-slate-100 text-slate-600 border-slate-200",
     muted: "bg-slate-50 text-slate-400 border-slate-100",
   };
@@ -43,11 +29,6 @@ export function SectionHeader({
       >
         {tier}
       </span>
-      {sharingStatus === "granted" || sharingStatus === "declined" ? (
-        <span className={`ml-auto ${sharingStatusConfig[sharingStatus].className}`}>
-          {sharingStatusConfig[sharingStatus].message}
-        </span>
-      ) : null}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { CaseNotesCard } from "../components/CaseNotesCard";
 import { FieldJumpCommand } from "../components/FieldJumpCommand";
 import { IntakeForm } from "../components/IntakeForm";
@@ -9,13 +9,9 @@ import { ReferralQueue } from "../components/ReferralQueue";
 import { ServiceInfoModal } from "../components/ServiceInfoModal";
 import { useCase } from "../context/CaseContext";
 import { agencies } from "../data/agencies";
-import { useAutosave } from "../hooks/useAutosave";
+import { INTAKE_SECTION_IDS } from "../data/constants";
 import { useEmergencyMode } from "../hooks/useEmergencyMode";
 import { scrollToIntakeElement } from "../lib/scroll";
-
-function serializeIntake(intake: object): string {
-  return JSON.stringify(intake);
-}
 
 export function IntakePage() {
   const {
@@ -39,9 +35,10 @@ export function IntakePage() {
   } = useCase();
 
   const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null);
+  const [activeSectionId, setActiveSectionId] = useState<string>(
+    INTAKE_SECTION_IDS.safety,
+  );
   const { toggleEmergencyMode } = useEmergencyMode(intake, setIntake);
-  const changeKey = useMemo(() => serializeIntake(intake), [intake]);
-  const saveLabel = useAutosave(changeKey);
 
   const handleToggleEmergency = useCallback(() => {
     const next = !intake.emergencyMode;
@@ -132,6 +129,7 @@ export function IntakePage() {
 
   const handleSectionNavigate = useCallback(
     (sectionId: string) => {
+      setActiveSectionId(sectionId);
       scrollToElement(sectionId);
     },
     [scrollToElement],
@@ -164,6 +162,7 @@ export function IntakePage() {
         navigatePanel={
           <NavigateIntakePanel
             emergencyMode={intake.emergencyMode}
+            activeSectionId={activeSectionId}
             consentStatus={intake.consentStatus}
             onNavigateToSection={handleSectionNavigate}
             onConsentChange={handleConsentChange}
@@ -171,9 +170,7 @@ export function IntakePage() {
             consentHighlighted={highlightedField === "consent"}
           />
         }
-        notesPanel={
-          <CaseNotesCard saveLabel={saveLabel} caseId={caseId} />
-        }
+        notesPanel={<CaseNotesCard caseId={caseId} />}
         mainContent={
           <IntakeForm
             intake={intake}

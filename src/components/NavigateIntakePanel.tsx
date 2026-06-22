@@ -4,6 +4,7 @@ import type { ConsentStatus } from "../types/intake";
 
 interface NavigateIntakePanelProps {
   emergencyMode: boolean;
+  activeSectionId?: string;
   consentStatus: ConsentStatus;
   onNavigateToSection?: (sectionId: string) => void;
   onConsentChange: (status: "granted" | "declined") => void;
@@ -13,6 +14,7 @@ interface NavigateIntakePanelProps {
 
 export function NavigateIntakePanel({
   emergencyMode,
+  activeSectionId,
   consentStatus,
   onNavigateToSection,
   onConsentChange,
@@ -20,16 +22,12 @@ export function NavigateIntakePanel({
   consentHighlighted,
 }: NavigateIntakePanelProps) {
   return (
-    <div className="flex h-full flex-col gap-5">
-      <div>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Navigate intake
-        </h2>
-        <IntakeProgressCard
-          emergencyMode={emergencyMode}
-          onNavigateToSection={onNavigateToSection}
-        />
-      </div>
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <IntakeProgressCard
+        emergencyMode={emergencyMode}
+        activeSectionId={activeSectionId}
+        onNavigateToSection={onNavigateToSection}
+      />
 
       <ConsentCard
         consentStatus={consentStatus}

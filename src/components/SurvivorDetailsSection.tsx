@@ -1,6 +1,6 @@
 import { Check, X } from "lucide-react";
 import { INTAKE_SECTION_IDS } from "../data/constants";
-import { getConsentStatusLine } from "../lib/consentStyles";
+import { getConsentStatusLine, getSurvivorDetailsBorderClass } from "../lib/consentStyles";
 import type { ConsentStatus, IntakeState } from "../types/intake";
 import { LocationAutocomplete } from "./LocationAutocomplete";
 import { SectionHeader } from "./ui/SectionHeader";
@@ -25,12 +25,12 @@ export function SurvivorDetailsSection({
   return (
     <section
       id={INTAKE_SECTION_IDS.survivorDetails}
-      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className={`scroll-mt-40 overflow-visible rounded-xl border bg-white p-6 shadow-sm ${getSurvivorDetailsBorderClass(consentStatus)}`}
     >
       <SectionHeader
         title="Survivor details"
         tier="Tier 1 · fast path"
-        sharingStatus={consentStatus}
+        tierVariant="fastPath"
       />
 
       {consentLine && (
@@ -92,7 +92,7 @@ export function SurvivorDetailsSection({
               htmlFor="estimated-age"
               className="mb-2.5 block text-sm font-medium text-slate-700"
             >
-              Age estimated
+              Age Estimated
             </label>
             <input
               id="estimated-age"
@@ -110,7 +110,7 @@ export function SurvivorDetailsSection({
               htmlFor="gender-identity"
               className="mb-2.5 block text-sm font-medium text-slate-700"
             >
-              Gender identity
+              Gender Identity
             </label>
             <input
               id="gender-identity"

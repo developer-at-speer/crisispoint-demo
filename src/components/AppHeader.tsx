@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCase } from "../context/CaseContext";
+import { ActiveCallTimer } from "./ActiveCallTimer";
 import { EndCallModal } from "./EndCallModal";
 import { SaveCloseCaseModal } from "./SaveCloseCaseModal";
 
@@ -83,7 +84,15 @@ export function AppHeader() {
           <span className="text-sm text-white/80">Operator workspace</span>
         )}
 
-        <div className="ml-auto flex items-center gap-5">
+        {onCaseRoute && callLinkedToCase ? (
+          <div className="flex flex-1 justify-center">
+            <ActiveCallTimer seconds={callLinkedToCase.durationSeconds} />
+          </div>
+        ) : (
+          <div className="flex-1" />
+        )}
+
+        <div className="flex items-center gap-5">
           {onCaseRoute && callLinkedToCase && (
             <button
               type="button"
