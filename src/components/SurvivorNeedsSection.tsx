@@ -1,0 +1,260 @@
+import { ChevronDown, X } from "lucide-react";
+import { useState } from "react";
+import { NEED_OPTIONS, SERVICE_TYPE_OPTIONS } from "../data/constants";
+import type { IntakeState } from "../types/intake";
+import { LocationAutocomplete } from "./LocationAutocomplete";
+import { SectionHeader } from "./ui/SectionHeader";
+import { questionClasses } from "./ui/FormQuestion";
+
+interface SurvivorNeedsSectionProps {
+  survivorNeeds: IntakeState["survivorNeeds"];
+  onChange: (needs: IntakeState["survivorNeeds"]) => void;
+  highlightedField: string | null;
+}
+
+export function SurvivorNeedsSection({
+  survivorNeeds,
+  onChange,
+  highlightedField,
+}: SurvivorNeedsSectionProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleServiceType = (type: string) => {
+    const types = survivorNeeds.serviceTypes.includes(type)
+      ? survivorNeeds.serviceTypes.filter((t) => t !== type)
+      : [...survivorNeeds.serviceTypes, type];
+    onChange({ ...survivorNeeds, serviceTypes: types });
+  };
+
+  const toggleNeed = (needId: string) => {
+    const needs = survivorNeeds.needs.includes(needId)
+      ? survivorNeeds.needs.filter((n) => n !== needId)
+      : [...survivorNeeds.needs, needId];
+    onChange({ ...survivorNeeds, needs });
+  };
+
+  const preferenceOptions = [
+    { value: "women_only", label: "Women only" },
+    { value: "mixed_family", label: "Open to mixed/family service" },
+    { value: "no_preference", label: "No preference" },
+  ] as const;
+
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <SectionHeader
+        title="Survivor details & service needs"
+        tier="Tier 1 · fast path"
+      />
+
+      <div className="space-y-5">
+        <div
+          id="preferredName"
+          className={questionClasses(highlightedField === "preferredName")}
+        >
+          <label
+            htmlFor="preferred-name"
+            className="mb-1.5 block text-sm font-medium text-slate-700"
+          >
+            Name (first or preferred name is fine)
+          </label>
+          <input
+            id="preferred-name"
+            type="text"
+            value={survivorNeeds.preferredName}
+            onChange={(e) =>
+              onChange({ ...survivorNeeds, preferredName: e.target.value })
+            }
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          />
+        </div>
+
+        <div
+          id="location"
+          className={questionClasses(highlightedField === "location")}
+        >
+          <label
+            htmlFor="location-input"
+            className="mb-1.5 block text-sm font-medium text-slate-700"
+          >
+            General location / area
+          </label>
+          <LocationAutocomplete
+            id="location-input"
+            value={survivorNeeds.location}
+            onChange={(location) =>
+              onChange({ ...survivorNeeds, location })
+            }
+            placeholder="Address, neighbourhood or city"
+          />
+        </div>
+
+        <div
+          id="serviceTypes"
+          className={questionClasses(highlightedField === "serviceTypes")}
+        >
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            Service type(s)
+          </label>
+          <div className="relative">
+            <div className="flex min-h-[42px] w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2">
+              <div className="flex flex-1 flex-wrap gap-1.5">
+                {survivorNeeds.serviceTypes.length === 0 ? (
+                  <span className="text-sm text-slate-400">Select service types</span>
+                ) : (
+                  survivorNeeds.serviceTypes.map((type) => (
+                    <span
+                      key={type}
+                      className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium uppercase text-slate-700"
+                    >
+                      {type}
+                      <button
+                        type="button"
+                        onClick={() => toggleServiceType(type)}
+                        aria-label={`Remove ${type}`}
+                        className="text-slate-500 hover:text-slate-800"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                aria-label="Open service type menu"
+                className="ml-2 shrink-0 text-slate-400"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </div>
+            {dropdownOpen && (
+              <div className="absolute z-20 mt-1 w-full rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                {SERVICE_TYPE_OPTIONS.map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => toggleServiceType(type)}
+                    className={`block w-full px-3 py-2 text-left text-sm hover:bg-slate-50 ${
+                      survivorNeeds.serviceTypes.includes(type)
+                        ? "bg-purple-50 font-medium text-brand"
+                        : ""
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <fieldset className="form-question m-0 border-0 p-0">
+          <legend className="mb-2 text-sm font-medium text-slate-700">
+            Service preference
+          </legend>
+          <div role="radiogroup" className="flex flex-wrap gap-4">
+            {preferenceOptions.map((opt) => {
+              const selected = survivorNeeds.servicePreference === opt.value;
+              return (
+                <label
+                  key={opt.value}
+                  className={`flex cursor-pointer items-center gap-2 text-sm ${
+                    selected ? "font-medium text-slate-900" : "text-slate-600"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="servicePreference"
+                    checked={selected}
+                    onChange={() =>
+                      onChange({
+                        ...survivorNeeds,
+                        servicePreference: opt.value,
+                      })
+                    }
+                    className="sr-only"
+                  />
+                  <span
+                    className={`flex h-5 w-5 items-center justify-center rounded border ${
+                      selected
+                        ? "border-brand-accent bg-brand-accent"
+                        : "border-slate-300 bg-white"
+                    }`}
+                  >
+                    {selected && (
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  {opt.label}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <fieldset className="form-question m-0 border-0 p-0">
+          <legend className="mb-2 text-sm font-medium text-slate-700">
+            Any of these apply?
+          </legend>
+          <div className="flex flex-wrap gap-4">
+            {NEED_OPTIONS.map((opt) => {
+              const selected = survivorNeeds.needs.includes(opt.id);
+              return (
+                <label
+                  key={opt.id}
+                  className={`flex cursor-pointer items-center gap-2 text-sm ${
+                    selected ? "font-medium text-slate-900" : "text-slate-600"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => toggleNeed(opt.id)}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`flex h-5 w-5 items-center justify-center rounded border ${
+                      selected
+                        ? "border-brand-accent bg-brand-accent"
+                        : "border-slate-300 bg-white"
+                    }`}
+                  >
+                    {selected && (
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  {opt.label}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      </div>
+    </section>
+  );
+}

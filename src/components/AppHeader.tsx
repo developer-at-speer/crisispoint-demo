@@ -1,0 +1,85 @@
+import { motion } from "framer-motion";
+import { LogOut, Save } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useCase } from "../context/CaseContext";
+import { CASE_NUMBER } from "../data/constants";
+import { SaveCloseCaseModal } from "./SaveCloseCaseModal";
+
+export function AppHeader() {
+  const { addActivityEvent } = useCase();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+
+  const handleSaveClose = () => {
+    addActivityEvent({
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+      type: "case_saved",
+      title: "Case saved and closed",
+      description: `Case #${CASE_NUMBER} intake saved to operator workspace.`,
+      actor: "Operator",
+    });
+  };
+
+  return (
+    <>
+      <motion.header
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="flex h-16 shrink-0 items-center gap-6 bg-brand px-6 text-white"
+      >
+        <div className="flex items-center rounded-md bg-white px-2 py-1">
+          <img
+            src="/awhl-logo.jpeg"
+            alt="Assaulted Women's Helpline"
+            className="h-9 w-auto object-contain"
+          />
+        </div>
+
+        <div className="h-8 w-px bg-white/40" />
+
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium">Case #{CASE_NUMBER}</span>
+          <span className="rounded bg-green-100 px-2 py-1 text-xs font-bold text-green-700">
+            ACTIVE SESSION
+          </span>
+        </div>
+
+        <div className="ml-auto flex items-center gap-5">
+          <button
+            type="button"
+            onClick={() => setSaveModalOpen(true)}
+            className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-brand-light shadow-sm transition hover:bg-slate-50"
+          >
+            <Save className="h-4 w-4" />
+            Save and Close Case
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              navigate("/login", { replace: true });
+            }}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+      </motion.header>
+
+      <SaveCloseCaseModal
+        open={saveModalOpen}
+        onClose={() => setSaveModalOpen(false)}
+        onConfirm={handleSaveClose}
+      />
+    </>
+  );
+}
