@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { CASE_NUMBER } from "../data/constants";
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
@@ -13,7 +12,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (isAuthenticated) {
-    return <Navigate to={`/case/${CASE_NUMBER}/intake`} replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -23,7 +22,7 @@ export function LoginPage() {
 
     const success = login(email, password);
     if (success) {
-      navigate(`/case/${CASE_NUMBER}/intake`, { replace: true });
+      navigate("/dashboard", { replace: true });
       return;
     }
 

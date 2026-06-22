@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
-import { getActiveNavId, navItems } from "../data/navigation";
+import { getActiveNavId, getNavItems } from "../data/navigation";
+import { useCase } from "../context/CaseContext";
 
 function NavTooltip({ label, visible }: { label: string; visible: boolean }) {
   return (
@@ -19,7 +21,7 @@ function NavTooltip({ label, visible }: { label: string; visible: boolean }) {
 
 function NavButton({ label, icon: Icon, to, active }: {
   label: string;
-  icon: typeof navItems[0]["icon"];
+  icon: LucideIcon;
   to: string;
   active: boolean;
 }) {
@@ -70,7 +72,9 @@ function NavButton({ label, icon: Icon, to, active }: {
 
 export function LeftRail() {
   const { pathname } = useLocation();
+  const { caseId } = useCase();
   const activeId = getActiveNavId(pathname);
+  const navItems = getNavItems(caseId);
 
   return (
     <nav

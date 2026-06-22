@@ -1,11 +1,44 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { HotlineQueuePanel } from "../components/HotlineQueuePanel";
 import { PageTransition } from "../components/PageTransition";
+import { SystemStatusWidget } from "../components/SystemStatusWidget";
+import { useCase } from "../context/CaseContext";
 import { dashboardCases, dashboardStats } from "../data/dashboard";
 import { CASE_NUMBER } from "../data/constants";
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const {
+    phoneCalls,
+    activityEvents,
+    createIntakeFromCall,
+    loadCase,
+    ringWaitingCall,
+    markCallResolved,
+    createFollowUpFromCall,
+  } = useCase();
+  const hasRung = useRef(false);
+  const ringWaitingCallRef = useRef(ringWaitingCall);
+  ringWaitingCallRef.current = ringWaitingCall;
+
+  useEffect(() => {
+    if (hasRung.current) return;
+    if (phoneCalls.some((c) => c.status === "waiting")) {
+      hasRung.current = true;
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      hasRung.current = true;
+      ringWaitingCallRef.current();
+    }, 2500);
+
+    return () => window.clearTimeout(timeout);
+    // Run once when the dashboard mounts — not on every call timer tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
@@ -20,6 +53,24 @@ export function DashboardPage() {
               What needs your attention right now
             </p>
           </header>
+
+          <HotlineQueuePanel
+            calls={phoneCalls}
+            recentActivity={activityEvents}
+            onCreateIntake={(callId) => {
+              const newCaseId = createIntakeFromCall(callId);
+              navigate(`/case/${newCaseId}/intake`);
+            }}
+            onOpenCase={(id) => {
+              loadCase(id);
+              navigate(`/case/${id}/intake`);
+            }}
+            onCreateFollowUp={(callId) => {
+              const newCaseId = createFollowUpFromCall(callId);
+              navigate(`/case/${newCaseId}/intake`);
+            }}
+            onMarkResolved={markCallResolved}
+          />
 
           <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {dashboardStats.map((stat, index) => (
@@ -39,52 +90,62 @@ export function DashboardPage() {
             ))}
           </div>
 
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">
-                Active work
-              </h2>
-              <button
-                type="button"
-                onClick={() => navigate(`/case/${CASE_NUMBER}/intake`)}
-                className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-light"
-              >
-                Start new intake
-              </button>
-            </div>
-
-            <ul className="space-y-2">
-              {dashboardCases.map((c, index) => (
-                <motion.li
-                  key={c.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + index * 0.05 }}
+          <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
+            <section>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Active work
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    loadCase(CASE_NUMBER);
+                    navigate(`/case/${CASE_NUMBER}/intake`);
+                  }}
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/case/${c.id}/intake`)}
-                    className={`flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left transition-colors hover:border-brand-accent hover:bg-purple-50/50 ${
-                      c.highlight
-                        ? "border-purple-200 bg-white shadow-sm"
-                        : "border-slate-200 bg-white"
-                    }`}
+                  Open current case
+                </button>
+              </div>
+
+              <ul className="space-y-2">
+                {dashboardCases.map((c, index) => (
+                  <motion.li
+                    key={c.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 + index * 0.05 }}
                   >
-                    <div>
-                      <p className="font-medium text-slate-900">{c.label}</p>
-                      <p className="text-sm text-slate-600">{c.survivor}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-slate-700">
-                        {c.status}
-                      </p>
-                      <p className="text-xs text-slate-500">{c.updated}</p>
-                    </div>
-                  </button>
-                </motion.li>
-              ))}
-            </ul>
-          </section>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        loadCase(c.id);
+                        navigate(`/case/${c.id}/intake`);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left transition-colors hover:border-brand-accent hover:bg-purple-50/50 ${
+                        c.highlight
+                          ? "border-purple-200 bg-white shadow-sm"
+                          : "border-slate-200 bg-white"
+                      }`}
+                    >
+                      <div>
+                        <p className="font-medium text-slate-900">{c.label}</p>
+                        <p className="text-sm text-slate-600">{c.survivor}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-slate-700">
+                          {c.status}
+                        </p>
+                        <p className="text-xs text-slate-500">{c.updated}</p>
+                      </div>
+                    </button>
+                  </motion.li>
+                ))}
+              </ul>
+            </section>
+
+            <SystemStatusWidget />
+          </div>
         </div>
       </PageTransition>
     </div>

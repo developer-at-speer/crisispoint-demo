@@ -1,22 +1,37 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { transitions } from "../data/constants";
+import { INTAKE_SECTION_IDS, transitions } from "../data/constants";
 
 interface ProgressItemProps {
   title: string;
   meta: string;
-  dotColor: string;
+  dotColor?: string;
+  hideDot?: boolean;
   muted?: boolean;
+  sectionId?: string;
+  onNavigate?: (sectionId: string) => void;
 }
 
-function ProgressItem({ title, meta, dotColor, muted }: ProgressItemProps) {
-  return (
-    <div
-      className={`flex items-start gap-3 py-2 ${muted ? "opacity-50" : ""}`}
-    >
-      <span
-        className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotColor}`}
-        aria-hidden="true"
-      />
+function ProgressItem({
+  title,
+  meta,
+  dotColor,
+  hideDot,
+  muted,
+  sectionId,
+  onNavigate,
+}: ProgressItemProps) {
+  const clickable = !muted && sectionId && onNavigate;
+
+  const content = (
+    <>
+      {!hideDot && dotColor ? (
+        <span
+          className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotColor}`}
+          aria-hidden="true"
+        />
+      ) : (
+        <span className="mt-1.5 w-2 shrink-0" aria-hidden="true" />
+      )}
       <div>
         <p
           className={`text-sm font-medium ${muted ? "text-slate-400" : "text-slate-800"}`}
@@ -25,15 +40,39 @@ function ProgressItem({ title, meta, dotColor, muted }: ProgressItemProps) {
         </p>
         <p className="text-xs text-slate-500">{meta}</p>
       </div>
-    </div>
+    </>
+  );
+
+  if (!clickable) {
+    return (
+      <div
+        className={`flex items-start gap-3 py-2 ${muted ? "opacity-50" : ""}`}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(sectionId)}
+      className="flex w-full items-start gap-3 rounded-lg px-1 py-2 text-left transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+    >
+      {content}
+    </button>
   );
 }
 
 interface IntakeProgressCardProps {
   emergencyMode: boolean;
+  onNavigateToSection?: (sectionId: string) => void;
 }
 
-export function IntakeProgressCard({ emergencyMode }: IntakeProgressCardProps) {
+export function IntakeProgressCard({
+  emergencyMode,
+  onNavigateToSection,
+}: IntakeProgressCardProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -44,11 +83,15 @@ export function IntakeProgressCard({ emergencyMode }: IntakeProgressCardProps) {
         title="Safety"
         meta="Tier 0 · always asked"
         dotColor="bg-red-500"
+        sectionId={INTAKE_SECTION_IDS.safety}
+        onNavigate={onNavigateToSection}
       />
       <ProgressItem
         title="Survivor details & service needs"
         meta="Tier 1 · fast path"
         dotColor="bg-green-500"
+        sectionId={INTAKE_SECTION_IDS.survivorNeeds}
+        onNavigate={onNavigateToSection}
       />
 
       <AnimatePresence initial={false}>
@@ -65,11 +108,15 @@ export function IntakeProgressCard({ emergencyMode }: IntakeProgressCardProps) {
               title="Incident details"
               meta="Tier 2 · if time allows"
               dotColor="bg-slate-400"
+              sectionId={INTAKE_SECTION_IDS.incidentDetails}
+              onNavigate={onNavigateToSection}
             />
             <ProgressItem
               title="Broader context"
               meta="Tier 3 · only if appropriate"
-              dotColor="bg-slate-300"
+              hideDot
+              sectionId={INTAKE_SECTION_IDS.broaderContext}
+              onNavigate={onNavigateToSection}
             />
           </motion.div>
         ) : (
@@ -90,7 +137,7 @@ export function IntakeProgressCard({ emergencyMode }: IntakeProgressCardProps) {
             <ProgressItem
               title="Broader context"
               meta="Hidden in emergency mode"
-              dotColor="bg-slate-300"
+              hideDot
               muted
             />
           </motion.div>

@@ -1,9 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { HoverScrollArea } from "../components/ui/HoverScrollArea";
 import { CaseNotesCard } from "../components/CaseNotesCard";
 import { ConsentCard } from "../components/ConsentCard";
 import { FieldJumpCommand } from "../components/FieldJumpCommand";
-import { IncomingCallModal } from "../components/IncomingCallModal";
 import { IntakeForm } from "../components/IntakeForm";
 import { IntakeProgressCard } from "../components/IntakeProgressCard";
 import { IntakeShell } from "../components/IntakeShell";
@@ -14,7 +13,7 @@ import { useCase } from "../context/CaseContext";
 import { agencies } from "../data/agencies";
 import { useAutosave } from "../hooks/useAutosave";
 import { useEmergencyMode } from "../hooks/useEmergencyMode";
-import { useState } from "react";
+import { scrollToIntakeElement } from "../lib/scroll";
 
 function serializeIntake(intake: object): string {
   return JSON.stringify(intake);
@@ -37,9 +36,6 @@ export function IntakePage() {
     setConsentWarning,
     consentHighlight,
     setConsentHighlight,
-    incomingCallVisible,
-    setIncomingCallVisible,
-    acceptCall,
     addActivityEvent,
   } = useCase();
 
@@ -94,16 +90,7 @@ export function IntakePage() {
     if (intake.consentStatus === "unknown") {
       setConsentPulse(true);
       setConsentWarning(true);
-      const scrollRoot = document.getElementById("workspace-scroll");
-      const el = document.getElementById("consent");
-      if (scrollRoot && el) {
-        const rootRect = scrollRoot.getBoundingClientRect();
-        const elRect = el.getBoundingClientRect();
-        scrollRoot.scrollTo({
-          top: scrollRoot.scrollTop + elRect.top - rootRect.top - 80,
-          behavior: "smooth",
-        });
-      }
+      scrollToIntakeElement("consent");
       setTimeout(() => setConsentPulse(false), 800);
       return;
     }
@@ -140,34 +127,28 @@ export function IntakePage() {
     addActivityEvent,
   ]);
 
+  const scrollToElement = useCallback((elementId: string) => {
+    scrollToIntakeElement(elementId);
+  }, []);
+
+  const handleSectionNavigate = useCallback(
+    (sectionId: string) => {
+      scrollToElement(sectionId);
+    },
+    [scrollToElement],
+  );
+
   const handleFieldJump = useCallback(
     (fieldId: string) => {
-      const scrollRoot = document.getElementById("workspace-scroll");
-
       if (fieldId === "consent") {
-        const el = document.getElementById("consent");
-        if (scrollRoot && el) {
-          const rootRect = scrollRoot.getBoundingClientRect();
-          const elRect = el.getBoundingClientRect();
-          scrollRoot.scrollTo({
-            top: scrollRoot.scrollTop + elRect.top - rootRect.top - 80,
-            behavior: "smooth",
-          });
-        }
+        scrollToElement("consent");
         setHighlightedField("consent");
         setTimeout(() => setHighlightedField(null), 1200);
         return;
       }
 
+      scrollToElement(fieldId);
       const el = document.getElementById(fieldId);
-      if (scrollRoot && el) {
-        const rootRect = scrollRoot.getBoundingClientRect();
-        const elRect = el.getBoundingClientRect();
-        scrollRoot.scrollTo({
-          top: scrollRoot.scrollTop + elRect.top - rootRect.top - 80,
-          behavior: "smooth",
-        });
-      }
 
       const input = el?.querySelector<HTMLElement>("input, button, [tabindex]");
       input?.focus();
@@ -175,7 +156,7 @@ export function IntakePage() {
       setHighlightedField(fieldId);
       setTimeout(() => setHighlightedField(null), 1200);
     },
-    [setHighlightedField],
+    [scrollToElement, setHighlightedField],
   );
 
   return (
@@ -184,7 +165,10 @@ export function IntakePage() {
         contextPanel={
           <>
             <HoverScrollArea label="Intake progress" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
-              <IntakeProgressCard emergencyMode={intake.emergencyMode} />
+              <IntakeProgressCard
+                emergencyMode={intake.emergencyMode}
+                onNavigateToSection={handleSectionNavigate}
+              />
             </HoverScrollArea>
             <HoverScrollArea label="Case notes" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
               <CaseNotesCard saveLabel={saveLabel} />
@@ -208,23 +192,24 @@ export function IntakePage() {
           />
         }
         rightPanel={
-          <ReferralMatcher
-            intake={intake}
-            referralQueue={referralQueue}
-            onAdd={addToQueue}
-            onInfo={setSelectedAgencyId}
-          />
+          <div className="flex h-full min-h-0 flex-col">
+            <ReferralMatcher
+              intake={intake}
+              referralQueue={referralQueue}
+              onAdd={addToQueue}
+              onInfo={setSelectedAgencyId}
+            />
+            <ReferralQueue
+              referralQueue={referralQueue}
+              consentStatus={intake.consentStatus}
+              sendState={sendState}
+              consentHighlight={consentHighlight}
+              consentWarning={consentWarning}
+              onRemove={removeFromQueue}
+              onSend={handleSend}
+            />
+          </div>
         }
-      />
-
-      <ReferralQueue
-        referralQueue={referralQueue}
-        consentStatus={intake.consentStatus}
-        sendState={sendState}
-        consentHighlight={consentHighlight}
-        consentWarning={consentWarning}
-        onRemove={removeFromQueue}
-        onSend={handleSend}
       />
 
       <ServiceInfoModal
@@ -237,12 +222,6 @@ export function IntakePage() {
       />
 
       <FieldJumpCommand onJump={handleFieldJump} />
-
-      <IncomingCallModal
-        visible={incomingCallVisible}
-        onAnswer={acceptCall}
-        onDismiss={() => setIncomingCallVisible(false)}
-      />
     </>
   );
 }

@@ -35,7 +35,7 @@ export function ReferralQueue({
 
   if (sendState === "success") {
     return (
-      <div className="fixed bottom-0 right-0 z-50 w-[360px] border-t border-slate-200 bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+      <div className="shrink-0 border-t border-slate-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <SuccessToast
           consentStatus={consentStatus}
           referralQueue={referralQueue}
@@ -45,7 +45,7 @@ export function ReferralQueue({
   }
 
   return (
-    <div className="fixed bottom-0 right-0 z-50 w-[360px] border-t border-slate-200 bg-white p-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+    <div className="shrink-0 border-t border-slate-200 bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">
           Referral Queue{" "}

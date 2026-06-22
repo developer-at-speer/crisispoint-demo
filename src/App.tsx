@@ -12,7 +12,6 @@ import { LoginPage } from "./pages/LoginPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { ResourceMapPage } from "./pages/ResourceMapPage";
-import { CASE_NUMBER } from "./data/constants";
 
 export default function App() {
   return (
@@ -24,9 +23,7 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route
                 path="/"
-                element={
-                  <Navigate to={`/case/${CASE_NUMBER}/intake`} replace />
-                }
+                element={<Navigate to="/dashboard" replace />}
               />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/case/:caseId/intake" element={<IntakePage />} />

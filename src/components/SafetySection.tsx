@@ -1,3 +1,4 @@
+import { INTAKE_SECTION_IDS } from "../data/constants";
 import type { IntakeState } from "../types/intake";
 import { TriStateRadio } from "./ui/TriStateRadio";
 import { SectionHeader } from "./ui/SectionHeader";
@@ -28,7 +29,10 @@ export function SafetySection({
   const callbackDisabled = safety.safeToCallBack === "no";
 
   return (
-    <section className="overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section
+      id={INTAKE_SECTION_IDS.safety}
+      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
       <SectionHeader
         title="Safety"
         tier="Tier 0 · always asked"

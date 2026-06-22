@@ -1,4 +1,8 @@
-import { INCIDENT_TYPES, RELATIONSHIP_OPTIONS } from "../data/constants";
+import {
+  INCIDENT_TYPES,
+  INTAKE_SECTION_IDS,
+  RELATIONSHIP_OPTIONS,
+} from "../data/constants";
 import type { IntakeState, TriState } from "../types/intake";
 import { SectionHeader } from "./ui/SectionHeader";
 import { TriStateRadio } from "./ui/TriStateRadio";
@@ -26,7 +30,10 @@ export function IncidentDetailsSection({
   };
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section
+      id={INTAKE_SECTION_IDS.incidentDetails}
+      className="scroll-mt-40 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
       <SectionHeader
         title="Incident details"
         tier="Tier 2 · if time allows"

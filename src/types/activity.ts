@@ -1,5 +1,10 @@
 export type ActivityEventType =
   | "case_created"
+  | "call_incoming"
+  | "call_answered"
+  | "call_ended"
+  | "intake_started"
+  | "callback_scheduled"
   | "emergency_mode_enabled"
   | "emergency_mode_disabled"
   | "consent_changed"

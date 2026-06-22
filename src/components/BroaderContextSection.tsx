@@ -1,3 +1,4 @@
+import { INTAKE_SECTION_IDS } from "../data/constants";
 import type { IntakeState, TriState } from "../types/intake";
 import { SectionHeader } from "./ui/SectionHeader";
 import { TriStateRadio } from "./ui/TriStateRadio";
@@ -20,7 +21,10 @@ export function BroaderContextSection({
   highlightedField,
 }: BroaderContextSectionProps) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm opacity-90">
+    <section
+      id={INTAKE_SECTION_IDS.broaderContext}
+      className="scroll-mt-40 rounded-xl border border-slate-200 bg-white p-5 shadow-sm opacity-90"
+    >
       <SectionHeader
         title="Broader context"
         tier="Tier 3 · only if appropriate"

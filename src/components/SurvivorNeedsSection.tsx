@@ -1,19 +1,25 @@
 import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
-import { NEED_OPTIONS, SERVICE_TYPE_OPTIONS } from "../data/constants";
-import type { IntakeState } from "../types/intake";
+import {
+  INTAKE_SECTION_IDS,
+  NEED_OPTIONS,
+  SERVICE_TYPE_OPTIONS,
+} from "../data/constants";
+import type { IntakeState, ConsentStatus } from "../types/intake";
 import { LocationAutocomplete } from "./LocationAutocomplete";
 import { SectionHeader } from "./ui/SectionHeader";
 import { questionClasses } from "./ui/FormQuestion";
 
 interface SurvivorNeedsSectionProps {
   survivorNeeds: IntakeState["survivorNeeds"];
+  consentStatus: ConsentStatus;
   onChange: (needs: IntakeState["survivorNeeds"]) => void;
   highlightedField: string | null;
 }
 
 export function SurvivorNeedsSection({
   survivorNeeds,
+  consentStatus,
   onChange,
   highlightedField,
 }: SurvivorNeedsSectionProps) {
@@ -40,10 +46,16 @@ export function SurvivorNeedsSection({
   ] as const;
 
   return (
-    <section className="overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section
+      id={INTAKE_SECTION_IDS.survivorNeeds}
+      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
       <SectionHeader
         title="Survivor details & service needs"
         tier="Tier 1 · fast path"
+        sharingStatus={
+          consentStatus === "unknown" ? undefined : consentStatus
+        }
       />
 
       <div className="space-y-5">

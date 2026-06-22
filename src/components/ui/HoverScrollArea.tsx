@@ -34,10 +34,10 @@ export function HoverScrollArea({
 
   return (
     <div
-      className={`hover-scroll-area group/scroll rounded-xl transition-shadow duration-150 ${
+      className={`hover-scroll-area group/scroll flex min-h-0 flex-col rounded-xl transition-shadow duration-150 ${
         hovered ? "shadow-md ring-1 ring-purple-100" : ""
       } ${className}`}
-      style={{ maxHeight }}
+      style={maxHeight === "100%" ? undefined : { maxHeight }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       aria-label={label}
@@ -45,10 +45,10 @@ export function HoverScrollArea({
       <div
         ref={scrollRef}
         onWheel={handleWheel}
-        className={`hover-scroll-inner max-h-[inherit] overflow-x-hidden overscroll-contain transition-[overflow] duration-150 ${
+        className={`hover-scroll-inner min-h-0 flex-1 overflow-x-hidden overscroll-contain transition-[overflow] duration-150 ${
           hovered ? "overflow-y-auto" : "overflow-y-hidden"
         }`}
-        style={{ maxHeight }}
+        style={maxHeight === "100%" ? undefined : { maxHeight }}
       >
         {children}
       </div>

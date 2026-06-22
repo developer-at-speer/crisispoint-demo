@@ -1,16 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { CASE_NUMBER } from "../data/constants";
 
 interface SaveCloseCaseModalProps {
   open: boolean;
+  caseId: string;
   onClose: () => void;
   onConfirm: () => void;
 }
 
 export function SaveCloseCaseModal({
   open,
+  caseId,
   onClose,
   onConfirm,
 }: SaveCloseCaseModalProps) {
@@ -63,7 +64,7 @@ export function SaveCloseCaseModal({
               Save and close case?
             </h2>
             <p className="mt-2 text-center text-sm text-slate-600">
-              Intake data for Case #{CASE_NUMBER} will be saved. You can return
+              Intake data for Case #{caseId} will be saved. You can return
               to this case from the dashboard at any time.
             </p>
 

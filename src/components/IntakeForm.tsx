@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { IntakeState } from "../types/intake";
 import { transitions } from "../data/constants";
+import { useIntakeStickyOffset } from "../hooks/useIntakeStickyOffset";
 import { BroaderContextSection } from "./BroaderContextSection";
 import { EmergencyModeBanner } from "./EmergencyModeBanner";
 import { IncidentDetailsSection } from "./IncidentDetailsSection";
@@ -20,20 +21,25 @@ export function IntakeForm({
   onToggleEmergency,
   highlightedField,
 }: IntakeFormProps) {
+  useIntakeStickyOffset();
+
   const update = (partial: Partial<IntakeState>) => {
     onIntakeChange({ ...intake, ...partial });
   };
 
   return (
-    <div className="flex flex-col gap-5 p-5">
-      <div className="shrink-0">
+    <div className="flex flex-col">
+      <div
+        id="intake-sticky-header"
+        className="sticky top-0 z-20 bg-page px-5 pb-4 pt-5 shadow-sm"
+      >
         <EmergencyModeBanner
           emergencyMode={intake.emergencyMode}
           onToggle={onToggleEmergency}
         />
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 px-5 pb-16">
         <SafetySection
           safety={intake.safety}
           onChange={(safety) => update({ safety })}
@@ -42,6 +48,7 @@ export function IntakeForm({
 
         <SurvivorNeedsSection
           survivorNeeds={intake.survivorNeeds}
+          consentStatus={intake.consentStatus}
           onChange={(survivorNeeds) => update({ survivorNeeds })}
           highlightedField={highlightedField}
         />
@@ -54,7 +61,7 @@ export function IntakeForm({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={transitions.slow}
-              className="space-y-5 overflow-hidden"
+              className="space-y-5"
             >
               <IncidentDetailsSection
                 incidentDetails={intake.incidentDetails}

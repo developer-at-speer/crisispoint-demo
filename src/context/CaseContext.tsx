@@ -8,10 +8,14 @@ import {
   type ReactNode,
 } from "react";
 import { trackingIds } from "../data/agencies";
+import {
+  initialPhoneCalls,
+  waitingCallTemplate,
+} from "../data/callQueue";
 import { CASE_NUMBER, initialState } from "../data/constants";
-import { formatCallDuration } from "../lib/callTimer";
 import type { ActivityEvent } from "../types/activity";
 import type { Attachment } from "../types/attachments";
+import type { PhoneCall } from "../types/call";
 import type { IntakeState, SendState } from "../types/intake";
 import type { CaseMessage } from "../types/messages";
 
@@ -46,6 +50,24 @@ const initialMessages: CaseMessage[] = [
   },
 ];
 
+let eventCounter = 10;
+let msgCounter = 10;
+let attachCounter = 1;
+let caseCounter = 817;
+let callCounter = 2;
+
+function nextCaseId() {
+  caseCounter += 1;
+  return `CP-2024-${caseCounter}`;
+}
+
+function nowTime() {
+  return new Date().toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 interface CaseContextValue {
   caseId: string;
   intake: IntakeState;
@@ -63,12 +85,12 @@ interface CaseContextValue {
   setConsentWarning: React.Dispatch<React.SetStateAction<boolean>>;
   consentHighlight: boolean;
   setConsentHighlight: React.Dispatch<React.SetStateAction<boolean>>;
-  incomingCallVisible: boolean;
-  setIncomingCallVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  callActive: boolean;
-  callDurationSeconds: number;
-  acceptCall: () => void;
-  endCall: () => void;
+  phoneCalls: PhoneCall[];
+  createIntakeFromCall: (callId: string) => string;
+  loadCase: (targetCaseId: string) => void;
+  ringWaitingCall: () => void;
+  markCallResolved: (callId: string) => void;
+  createFollowUpFromCall: (callId: string) => string;
   activityEvents: ActivityEvent[];
   addActivityEvent: (event: Omit<ActivityEvent, "id">) => void;
   messages: CaseMessage[];
@@ -79,11 +101,8 @@ interface CaseContextValue {
 
 const CaseContext = createContext<CaseContextValue | null>(null);
 
-let eventCounter = 10;
-let msgCounter = 10;
-let attachCounter = 1;
-
 export function CaseProvider({ children }: { children: ReactNode }) {
+  const [caseId, setCaseId] = useState(CASE_NUMBER);
   const [intake, setIntake] = useState<IntakeState>(initialState);
   const [referralQueue, setReferralQueue] = useState<string[]>([]);
   const [sendState, setSendState] = useState<SendState>("idle");
@@ -91,9 +110,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [consentPulse, setConsentPulse] = useState(false);
   const [consentWarning, setConsentWarning] = useState(false);
   const [consentHighlight, setConsentHighlight] = useState(false);
-  const [incomingCallVisible, setIncomingCallVisible] = useState(true);
-  const [callActive, setCallActive] = useState(false);
-  const [callDurationSeconds, setCallDurationSeconds] = useState(0);
+  const [phoneCalls, setPhoneCalls] = useState<PhoneCall[]>(initialPhoneCalls);
   const [activityEvents, setActivityEvents] = useState(initialActivity);
   const [messages, setMessages] = useState(initialMessages);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -116,10 +133,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setReferralQueue((prev) => {
         if (prev.includes(agencyId)) return prev;
         addActivityEvent({
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit",
-          }),
+          timestamp: nowTime(),
           type: "referral_added",
           title: "Referral added to queue",
           actor: "Operator",
@@ -135,49 +149,145 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!callActive) {
-      setCallDurationSeconds(0);
-      return;
-    }
-
     const interval = window.setInterval(() => {
-      setCallDurationSeconds((seconds) => seconds + 1);
+      setPhoneCalls((prev) =>
+        prev.map((call) => {
+          if (
+            call.status === "waiting" ||
+            call.status === "active" ||
+            call.status === "linked_to_intake" ||
+            call.status === "missed" ||
+            call.status === "follow_up_required"
+          ) {
+            return { ...call, durationSeconds: call.durationSeconds + 1 };
+          }
+          return call;
+        }),
+      );
     }, 1000);
 
     return () => window.clearInterval(interval);
-  }, [callActive]);
+  }, []);
 
-  const acceptCall = useCallback(() => {
-    setIncomingCallVisible(false);
-    setCallActive(true);
-    setCallDurationSeconds(0);
-    addActivityEvent({
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-      type: "case_created",
-      title: "Call answered",
-      description: `Active session started for Case #${CASE_NUMBER}.`,
-      actor: "Operator",
+  const ringWaitingCall = useCallback(() => {
+    const pendingCall: { current: PhoneCall | null } = { current: null };
+
+    setPhoneCalls((prev) => {
+      if (prev.some((c) => c.status === "waiting")) return prev;
+
+      callCounter += 1;
+      pendingCall.current = {
+        id: `call-${String(callCounter).padStart(3, "0")}`,
+        ...waitingCallTemplate,
+        durationSeconds: 0,
+      };
+
+      return [pendingCall.current, ...prev];
     });
+
+    if (pendingCall.current) {
+      const newCall = pendingCall.current;
+      addActivityEvent({
+        timestamp: nowTime(),
+        type: "call_incoming",
+        title: "Call received",
+        description: `${newCall.lineName} — waiting in queue.`,
+        actor: "System",
+      });
+    }
   }, [addActivityEvent]);
 
-  const endCall = useCallback(() => {
-    const duration = formatCallDuration(callDurationSeconds);
-    setCallActive(false);
-    setCallDurationSeconds(0);
-    addActivityEvent({
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-      type: "note_added",
-      title: "Call ended",
-      description: `Active session closed for Case #${CASE_NUMBER} after ${duration}.`,
-      actor: "Operator",
-    });
-  }, [addActivityEvent, callDurationSeconds]);
+  const loadCase = useCallback((targetCaseId: string) => {
+    setCaseId(targetCaseId);
+    if (targetCaseId === CASE_NUMBER) {
+      setIntake(initialState);
+    }
+  }, []);
+
+  const createIntakeFromCall = useCallback(
+    (callId: string) => {
+      const call = phoneCalls.find((c) => c.id === callId);
+      const newCaseId = nextCaseId();
+
+      setCaseId(newCaseId);
+      setIntake({ ...initialState, emergencyMode: false });
+      setReferralQueue([]);
+      setSendState("idle");
+
+      setPhoneCalls((prev) =>
+        prev.map((c) =>
+          c.id === callId
+            ? {
+                ...c,
+                status: "linked_to_intake" as const,
+                linkedCaseId: newCaseId,
+                operatorName: "Julia",
+                durationSeconds: c.status === "waiting" ? 0 : c.durationSeconds,
+              }
+            : c,
+        ),
+      );
+
+      addActivityEvent({
+        timestamp: nowTime(),
+        type: "intake_started",
+        title: "Intake created from call queue",
+        description: `Case #${newCaseId} linked to ${call?.lineName ?? "hotline call"}.`,
+        actor: "Operator",
+      });
+
+      return newCaseId;
+    },
+    [phoneCalls, addActivityEvent],
+  );
+
+  const markCallResolved = useCallback(
+    (callId: string) => {
+      setPhoneCalls((prev) => prev.filter((c) => c.id !== callId));
+      addActivityEvent({
+        timestamp: nowTime(),
+        type: "note_added",
+        title: "Missed call resolved",
+        description: "Follow-up marked complete from dashboard queue.",
+        actor: "Operator",
+      });
+    },
+    [addActivityEvent],
+  );
+
+  const createFollowUpFromCall = useCallback(
+    (callId: string) => {
+      const newCaseId = nextCaseId();
+      setCaseId(newCaseId);
+      setIntake({
+        ...initialState,
+        emergencyMode: false,
+        survivorNeeds: {
+          ...initialState.survivorNeeds,
+          preferredName: "",
+          location: "",
+          serviceTypes: [],
+        },
+        safety: {
+          ...initialState.safety,
+          safeToCallBack: null,
+          callbackNumber: "",
+          callbackTime: "",
+        },
+      });
+      setReferralQueue([]);
+      markCallResolved(callId);
+      addActivityEvent({
+        timestamp: nowTime(),
+        type: "case_created",
+        title: "Follow-up case created",
+        description: `Lightweight case #${newCaseId} opened from missed call.`,
+        actor: "Operator",
+      });
+      return newCaseId;
+    },
+    [addActivityEvent, markCallResolved],
+  );
 
   const addMessage = useCallback(
     (body: string, channel: "internal" | "agency" = "internal") => {
@@ -188,10 +298,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         senderName: "Operator",
         senderType: "awhl_staff",
         body,
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-        }),
+        timestamp: nowTime(),
         visibility: channel === "internal" ? "internal_only" : "shared_with_agency",
       };
       setMessages((prev) => [...prev, msg]);
@@ -215,10 +322,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         ? "Anonymized Referral Summary"
         : `Referral Summary — Safe Harbor`,
       type: "referral_summary",
-      createdAt: new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      }),
+      createdAt: nowTime(),
       createdBy: "Operator",
       sharingMode: anonymized ? "anonymized" : "identifiable",
       status: "ready",
@@ -228,7 +332,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      caseId: CASE_NUMBER,
+      caseId,
       intake,
       setIntake,
       referralQueue,
@@ -244,12 +348,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setConsentWarning,
       consentHighlight,
       setConsentHighlight,
-      incomingCallVisible,
-      setIncomingCallVisible,
-      callActive,
-      callDurationSeconds,
-      acceptCall,
-      endCall,
+      phoneCalls,
+      createIntakeFromCall,
+      loadCase,
+      ringWaitingCall,
+      markCallResolved,
+      createFollowUpFromCall,
       activityEvents,
       addActivityEvent,
       messages,
@@ -258,6 +362,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       generateReferralSummary,
     }),
     [
+      caseId,
       intake,
       referralQueue,
       sendState,
@@ -265,11 +370,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       consentPulse,
       consentWarning,
       consentHighlight,
-      incomingCallVisible,
-      callActive,
-      callDurationSeconds,
-      acceptCall,
-      endCall,
+      phoneCalls,
+      createIntakeFromCall,
+      loadCase,
+      ringWaitingCall,
+      markCallResolved,
+      createFollowUpFromCall,
       activityEvents,
       addActivityEvent,
       messages,

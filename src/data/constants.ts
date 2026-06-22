@@ -3,6 +3,13 @@ import type { ConsentStatus } from "../types/intake";
 
 export const CASE_NUMBER = "CP-2024-817";
 
+export const INTAKE_SECTION_IDS = {
+  safety: "intake-section-safety",
+  survivorNeeds: "intake-section-survivor-needs",
+  incidentDetails: "intake-section-incident-details",
+  broaderContext: "intake-section-broader-context",
+} as const;
+
 export const transitions = {
   fast: { duration: 0.12, ease: "easeOut" as const },
   standard: { duration: 0.22, ease: "easeOut" as const },

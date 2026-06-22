@@ -26,8 +26,8 @@ export function ReferralMatcher({
     intake.survivorNeeds.servicePreference === "women_only";
 
   return (
-    <div>
-      <div className="border-b border-slate-200 p-4">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 border-b border-slate-200 p-4">
         <h2 className="text-sm font-semibold text-slate-900">
           Live Referral Matcher
         </h2>
@@ -60,10 +60,10 @@ export function ReferralMatcher({
 
       <HoverScrollArea
         label="Referral matches"
-        maxHeight="calc(100vh - 5rem - 12rem)"
-        className="mx-0"
+        maxHeight="100%"
+        className="mx-0 min-h-0 flex-1"
       >
-        <div className="space-y-3 p-4 pb-4">
+        <div className="space-y-3 p-4">
           {matches.length === 0 && intake.survivorNeeds.location.trim() && (
             <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
               No services match this address. Try a broader area or neighbourhood.

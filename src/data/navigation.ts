@@ -9,7 +9,6 @@ import {
   Shield,
   Users,
 } from "lucide-react";
-import { CASE_NUMBER } from "./constants";
 
 export type NavId =
   | "dashboard"
@@ -28,41 +27,43 @@ export interface NavItem {
   icon: LucideIcon;
 }
 
-export const navItems: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", path: "/dashboard", icon: Home },
-  {
-    id: "intake",
-    label: "Current Intake",
-    path: `/case/${CASE_NUMBER}/intake`,
-    icon: FileText,
-  },
-  { id: "agencies", label: "Agencies & Contacts", path: "/agencies", icon: Users },
-  {
-    id: "privacy",
-    label: "Privacy & Consent",
-    path: `/case/${CASE_NUMBER}/privacy`,
-    icon: Shield,
-  },
-  {
-    id: "history",
-    label: "Activity History",
-    path: `/case/${CASE_NUMBER}/history`,
-    icon: Clock,
-  },
-  { id: "map", label: "Resource Map", path: "/resources/map", icon: Map },
-  {
-    id: "messages",
-    label: "Notes & Messages",
-    path: `/case/${CASE_NUMBER}/messages`,
-    icon: MessageSquare,
-  },
-  {
-    id: "attachments",
-    label: "Attachments",
-    path: `/case/${CASE_NUMBER}/attachments`,
-    icon: Paperclip,
-  },
-];
+export function getNavItems(caseId: string): NavItem[] {
+  return [
+    { id: "dashboard", label: "Dashboard", path: "/dashboard", icon: Home },
+    {
+      id: "intake",
+      label: "Current Intake",
+      path: `/case/${caseId}/intake`,
+      icon: FileText,
+    },
+    { id: "agencies", label: "Agencies & Contacts", path: "/agencies", icon: Users },
+    {
+      id: "privacy",
+      label: "Privacy & Consent",
+      path: `/case/${caseId}/privacy`,
+      icon: Shield,
+    },
+    {
+      id: "history",
+      label: "Activity History",
+      path: `/case/${caseId}/history`,
+      icon: Clock,
+    },
+    { id: "map", label: "Resource Map", path: "/resources/map", icon: Map },
+    {
+      id: "messages",
+      label: "Notes & Messages",
+      path: `/case/${caseId}/messages`,
+      icon: MessageSquare,
+    },
+    {
+      id: "attachments",
+      label: "Attachments",
+      path: `/case/${caseId}/attachments`,
+      icon: Paperclip,
+    },
+  ];
+}
 
 export function getActiveNavId(pathname: string): NavId {
   if (pathname.startsWith("/dashboard")) return "dashboard";
