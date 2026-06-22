@@ -30,7 +30,7 @@ export function SectionHeader({
 
   return (
     <div
-      className="sticky z-10 -mx-5 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-200 bg-white px-5 pb-3 pt-4"
+      className="sticky z-10 -mx-6 mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-200 bg-white px-6 pb-4 pt-5"
       style={{ top: "var(--intake-sticky-offset, 8.5rem)" }}
     >
       <h2 className="text-lg font-semibold text-slate-900">{title}</h2>

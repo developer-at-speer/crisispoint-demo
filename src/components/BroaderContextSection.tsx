@@ -23,7 +23,7 @@ export function BroaderContextSection({
   return (
     <section
       id={INTAKE_SECTION_IDS.broaderContext}
-      className="scroll-mt-40 rounded-xl border border-slate-200 bg-white p-5 shadow-sm opacity-90"
+      className="scroll-mt-40 rounded-xl border border-slate-200 bg-white p-6 shadow-sm opacity-90"
     >
       <SectionHeader
         title="Broader context"
@@ -31,7 +31,7 @@ export function BroaderContextSection({
         tierVariant="muted"
       />
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div className="form-question">
           <label
             htmlFor="estimated-age"

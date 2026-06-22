@@ -48,7 +48,7 @@ export function SurvivorNeedsSection({
   return (
     <section
       id={INTAKE_SECTION_IDS.survivorNeeds}
-      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
     >
       <SectionHeader
         title="Survivor details & service needs"
@@ -58,7 +58,7 @@ export function SurvivorNeedsSection({
         }
       />
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div
           id="preferredName"
           className={questionClasses(highlightedField === "preferredName")}

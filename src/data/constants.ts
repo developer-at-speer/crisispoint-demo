@@ -16,6 +16,44 @@ export const transitions = {
   slow: { duration: 0.35, ease: "easeInOut" as const },
 };
 
+export function createEmptyIntakeState(): IntakeState {
+  return {
+    emergencyMode: false,
+    consentStatus: "unknown",
+    safety: {
+      safeToTalk: null,
+      safeToCallBack: null,
+      callbackNumber: "",
+      callbackTime: "",
+      dependentsPresent: null,
+      medicalAttentionRequired: null,
+    },
+    survivorNeeds: {
+      preferredName: "",
+      location: "",
+      serviceTypes: [],
+      servicePreference: null,
+      needs: [],
+    },
+    incidentDetails: {
+      incidentTypes: [],
+      incidentDate: "",
+      recency: "",
+      relationship: null,
+      accessToLocationOrDevices: null,
+      weaponsInvolvedOrThreatened: null,
+      protectionOrder: null,
+    },
+    broaderContext: {
+      estimatedAge: "",
+      childrenAccompanying: "",
+      supportNetwork: "",
+      contactedBefore: null,
+    },
+  };
+}
+
+/** Populated demo data for Case #CP-2024-817 presenter path */
 export const initialState: IntakeState = {
   emergencyMode: false,
   consentStatus: "unknown",

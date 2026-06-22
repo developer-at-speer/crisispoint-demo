@@ -16,7 +16,7 @@ export function EmergencyModeBanner({
         borderColor: emergencyMode ? "#ef4444" : "#d1d5db",
       }}
       transition={{ duration: 0.2 }}
-      className="flex shrink-0 items-center justify-between gap-4 rounded-xl border bg-white p-5"
+      className="flex shrink-0 items-center justify-between gap-4 rounded-xl border bg-white p-6"
     >
       <div>
         <h2

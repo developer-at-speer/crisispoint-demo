@@ -32,14 +32,14 @@ export function IncidentDetailsSection({
   return (
     <section
       id={INTAKE_SECTION_IDS.incidentDetails}
-      className="scroll-mt-40 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="scroll-mt-40 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
     >
       <SectionHeader
         title="Incident details"
         tier="Tier 2 · if time allows"
       />
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div className="form-question">
           <label className="mb-2 block text-sm font-medium text-slate-700">
             Select Incident Type(s)

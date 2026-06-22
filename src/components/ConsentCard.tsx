@@ -18,15 +18,15 @@ const stateConfig = {
     showWarning: true,
   },
   granted: {
-    borderColor: "#cbd5e1",
-    backgroundColor: "#f4f5f7",
+    borderColor: "#16a34a",
+    backgroundColor: "#f0fdf4",
     title: "Consent granted",
     body: "Identifiable information can be shared with selected service(s).",
     showWarning: false,
   },
   declined: {
-    borderColor: "#cbd5e1",
-    backgroundColor: "#f4f5f7",
+    borderColor: "#dc2626",
+    backgroundColor: "#fef2f2",
     title: "Consent declined",
     body: "Referral will be anonymized. Identifiable fields will be masked before hand-off.",
     showWarning: false,
@@ -93,7 +93,7 @@ export function ConsentCard({
           onClick={() => onConsentChange("declined")}
           className={`flex-1 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${
             consentStatus === "declined"
-              ? "bg-blue-600 text-white"
+              ? "bg-red-600 text-white"
               : "border border-red-400 bg-white text-red-600 hover:bg-red-50"
           }`}
         >

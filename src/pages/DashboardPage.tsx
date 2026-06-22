@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { HotlineQueuePanel } from "../components/HotlineQueuePanel";
+import { IncomingCallModal } from "../components/IncomingCallModal";
 import { PageTransition } from "../components/PageTransition";
 import { SystemStatusWidget } from "../components/SystemStatusWidget";
 import { useCase } from "../context/CaseContext";
@@ -12,10 +13,12 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const {
     phoneCalls,
+    incomingCallId,
     activityEvents,
     createIntakeFromCall,
     loadCase,
     ringWaitingCall,
+    dismissIncomingCall,
     markCallResolved,
     createFollowUpFromCall,
   } = useCase();
@@ -39,6 +42,20 @@ export function DashboardPage() {
     // Run once when the dashboard mounts — not on every call timer tick.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const incomingCall = useMemo(
+    () => phoneCalls.find((call) => call.id === incomingCallId) ?? null,
+    [phoneCalls, incomingCallId],
+  );
+
+  const showIncomingCallModal =
+    incomingCall !== null && incomingCall.status === "waiting";
+
+  const handleAnswerIncomingCall = () => {
+    if (!incomingCallId) return;
+    const newCaseId = createIntakeFromCall(incomingCallId);
+    navigate(`/case/${newCaseId}/intake`);
+  };
 
   return (
     <div
@@ -148,6 +165,13 @@ export function DashboardPage() {
           </div>
         </div>
       </PageTransition>
+
+      <IncomingCallModal
+        call={incomingCall}
+        visible={showIncomingCallModal}
+        onAnswer={handleAnswerIncomingCall}
+        onDismiss={dismissIncomingCall}
+      />
     </div>
   );
 }

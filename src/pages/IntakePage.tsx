@@ -21,6 +21,7 @@ function serializeIntake(intake: object): string {
 
 export function IntakePage() {
   const {
+    caseId,
     intake,
     setIntake,
     referralQueue,
@@ -171,7 +172,7 @@ export function IntakePage() {
               />
             </HoverScrollArea>
             <HoverScrollArea label="Case notes" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
-              <CaseNotesCard saveLabel={saveLabel} />
+              <CaseNotesCard saveLabel={saveLabel} caseId={caseId} />
             </HoverScrollArea>
             <HoverScrollArea label="Consent" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
               <ConsentCard

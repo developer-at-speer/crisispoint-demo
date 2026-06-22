@@ -27,7 +27,7 @@ export function TriStateRadio({
       id={id}
       role="group"
       aria-labelledby={labelId}
-      className={`form-question space-y-2 ${className ?? ""}`.trim()}
+      className={`form-question space-y-3 ${className ?? ""}`.trim()}
     >
       <div
         id={labelId}
@@ -38,7 +38,7 @@ export function TriStateRadio({
       <div
         role="radiogroup"
         aria-label={label}
-        className="flex flex-wrap gap-x-4 gap-y-2"
+        className="flex flex-wrap gap-x-5 gap-y-3"
       >
         {options.map((opt) => {
           const selected = value === opt.value;

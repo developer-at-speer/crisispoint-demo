@@ -31,7 +31,7 @@ export function IntakeForm({
     <div className="flex flex-col">
       <div
         id="intake-sticky-header"
-        className="sticky top-0 z-20 bg-page px-5 pb-4 pt-5 shadow-sm"
+        className="sticky top-0 z-20 bg-page px-5 pb-5 pt-5 shadow-sm"
       >
         <EmergencyModeBanner
           emergencyMode={intake.emergencyMode}
@@ -39,7 +39,7 @@ export function IntakeForm({
         />
       </div>
 
-      <div className="flex flex-col gap-5 px-5 pb-16">
+      <div className="flex flex-col gap-6 px-5 pb-16 pt-2">
         <SafetySection
           safety={intake.safety}
           onChange={(safety) => update({ safety })}
@@ -61,7 +61,7 @@ export function IntakeForm({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={transitions.slow}
-              className="space-y-5"
+              className="space-y-6"
             >
               <IncidentDetailsSection
                 incidentDetails={intake.incidentDetails}

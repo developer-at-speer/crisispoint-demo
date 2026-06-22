@@ -12,7 +12,7 @@ import {
   initialPhoneCalls,
   waitingCallTemplate,
 } from "../data/callQueue";
-import { CASE_NUMBER, initialState } from "../data/constants";
+import { CASE_NUMBER, createEmptyIntakeState, initialState } from "../data/constants";
 import type { ActivityEvent } from "../types/activity";
 import type { Attachment } from "../types/attachments";
 import type { PhoneCall } from "../types/call";
@@ -86,11 +86,15 @@ interface CaseContextValue {
   consentHighlight: boolean;
   setConsentHighlight: React.Dispatch<React.SetStateAction<boolean>>;
   phoneCalls: PhoneCall[];
+  incomingCallId: string | null;
   createIntakeFromCall: (callId: string) => string;
   loadCase: (targetCaseId: string) => void;
   ringWaitingCall: () => void;
+  dismissIncomingCall: () => void;
   markCallResolved: (callId: string) => void;
   createFollowUpFromCall: (callId: string) => string;
+  callLinkedToCase: PhoneCall | null;
+  endCall: () => void;
   activityEvents: ActivityEvent[];
   addActivityEvent: (event: Omit<ActivityEvent, "id">) => void;
   messages: CaseMessage[];
@@ -111,6 +115,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [consentWarning, setConsentWarning] = useState(false);
   const [consentHighlight, setConsentHighlight] = useState(false);
   const [phoneCalls, setPhoneCalls] = useState<PhoneCall[]>(initialPhoneCalls);
+  const [incomingCallId, setIncomingCallId] = useState<string | null>(null);
   const [activityEvents, setActivityEvents] = useState(initialActivity);
   const [messages, setMessages] = useState(initialMessages);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -187,6 +192,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
     if (pendingCall.current) {
       const newCall = pendingCall.current;
+      setIncomingCallId(newCall.id);
       addActivityEvent({
         timestamp: nowTime(),
         type: "call_incoming",
@@ -197,11 +203,21 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }
   }, [addActivityEvent]);
 
+  const dismissIncomingCall = useCallback(() => {
+    setIncomingCallId(null);
+  }, []);
+
   const loadCase = useCallback((targetCaseId: string) => {
     setCaseId(targetCaseId);
-    if (targetCaseId === CASE_NUMBER) {
-      setIntake(initialState);
-    }
+    setIntake(
+      targetCaseId === CASE_NUMBER ? initialState : createEmptyIntakeState(),
+    );
+    setReferralQueue([]);
+    setSendState("idle");
+    setConsentPulse(false);
+    setConsentWarning(false);
+    setConsentHighlight(false);
+    setHighlightedField(null);
   }, []);
 
   const createIntakeFromCall = useCallback(
@@ -210,9 +226,13 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       const newCaseId = nextCaseId();
 
       setCaseId(newCaseId);
-      setIntake({ ...initialState, emergencyMode: false });
+      setIntake(createEmptyIntakeState());
       setReferralQueue([]);
       setSendState("idle");
+      setConsentPulse(false);
+      setConsentWarning(false);
+      setConsentHighlight(false);
+      setHighlightedField(null);
 
       setPhoneCalls((prev) =>
         prev.map((c) =>
@@ -227,6 +247,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
             : c,
         ),
       );
+      setIncomingCallId((current) => (current === callId ? null : current));
 
       addActivityEvent({
         timestamp: nowTime(),
@@ -259,23 +280,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     (callId: string) => {
       const newCaseId = nextCaseId();
       setCaseId(newCaseId);
-      setIntake({
-        ...initialState,
-        emergencyMode: false,
-        survivorNeeds: {
-          ...initialState.survivorNeeds,
-          preferredName: "",
-          location: "",
-          serviceTypes: [],
-        },
-        safety: {
-          ...initialState.safety,
-          safeToCallBack: null,
-          callbackNumber: "",
-          callbackTime: "",
-        },
-      });
+      setIntake(createEmptyIntakeState());
       setReferralQueue([]);
+      setSendState("idle");
       markCallResolved(callId);
       addActivityEvent({
         timestamp: nowTime(),
@@ -288,6 +295,41 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     },
     [addActivityEvent, markCallResolved],
   );
+
+  const callLinkedToCase = useMemo(
+    () =>
+      phoneCalls.find(
+        (call) =>
+          call.linkedCaseId === caseId && call.status === "linked_to_intake",
+      ) ?? null,
+    [phoneCalls, caseId],
+  );
+
+  const endCall = useCallback(() => {
+    setIntake(createEmptyIntakeState());
+    setReferralQueue([]);
+    setSendState("idle");
+    setConsentPulse(false);
+    setConsentWarning(false);
+    setConsentHighlight(false);
+    setHighlightedField(null);
+
+    setPhoneCalls((prev) =>
+      prev.map((call) =>
+        call.linkedCaseId === caseId && call.status === "linked_to_intake"
+          ? { ...call, status: "completed" as const }
+          : call,
+      ),
+    );
+
+    addActivityEvent({
+      timestamp: nowTime(),
+      type: "call_ended",
+      title: "Call ended",
+      description: `Case #${caseId} intake cleared for next caller.`,
+      actor: "Operator",
+    });
+  }, [caseId, addActivityEvent]);
 
   const addMessage = useCallback(
     (body: string, channel: "internal" | "agency" = "internal") => {
@@ -349,11 +391,15 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       consentHighlight,
       setConsentHighlight,
       phoneCalls,
+      incomingCallId,
       createIntakeFromCall,
       loadCase,
       ringWaitingCall,
+      dismissIncomingCall,
       markCallResolved,
       createFollowUpFromCall,
+      callLinkedToCase,
+      endCall,
       activityEvents,
       addActivityEvent,
       messages,
@@ -371,11 +417,15 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       consentWarning,
       consentHighlight,
       phoneCalls,
+      incomingCallId,
       createIntakeFromCall,
       loadCase,
       ringWaitingCall,
+      dismissIncomingCall,
       markCallResolved,
       createFollowUpFromCall,
+      callLinkedToCase,
+      endCall,
       activityEvents,
       addActivityEvent,
       messages,

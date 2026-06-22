@@ -31,7 +31,7 @@ export function SafetySection({
   return (
     <section
       id={INTAKE_SECTION_IDS.safety}
-      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="scroll-mt-40 overflow-visible rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
     >
       <SectionHeader
         title="Safety"
@@ -39,7 +39,7 @@ export function SafetySection({
         tierVariant="urgent"
       />
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <TriStateRadio
           id="safeToTalk"
           className={highlightedField === "safeToTalk" ? "field-highlight" : undefined}
@@ -52,7 +52,7 @@ export function SafetySection({
           }
         />
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <TriStateRadio
             id="safeToCallBack"
             className={highlightedField === "safeToCallBack" ? "field-highlight" : undefined}
@@ -69,7 +69,7 @@ export function SafetySection({
           />
 
           <div
-            className={`grid gap-4 sm:grid-cols-2 transition-opacity ${
+            className={`grid gap-5 sm:grid-cols-2 transition-opacity ${
               callbackDisabled ? "pointer-events-none opacity-50" : ""
             }`}
           >

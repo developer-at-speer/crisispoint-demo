@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { LogOut, Save } from "lucide-react";
+import { LogOut, PhoneOff, Save } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -17,7 +17,7 @@ function OperatorAvatar({ name }: { name: string }) {
 }
 
 export function AppHeader() {
-  const { caseId, addActivityEvent } = useCase();
+  const { caseId, callLinkedToCase, endCall, addActivityEvent } = useCase();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -67,6 +67,16 @@ export function AppHeader() {
         )}
 
         <div className="ml-auto flex items-center gap-5">
+          {onCaseRoute && callLinkedToCase && (
+            <button
+              type="button"
+              onClick={endCall}
+              className="flex items-center gap-2 rounded-md bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+            >
+              <PhoneOff className="h-4 w-4" />
+              End Call
+            </button>
+          )}
           {onCaseRoute && (
             <button
               type="button"
