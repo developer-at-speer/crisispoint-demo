@@ -1,10 +1,10 @@
 import { MapPin } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
-  formatPlaceForIntake,
-  getGoogleMapsApiKey,
-  loadGoogleMaps,
-} from "../lib/googleMaps";
+  fetchPlaceSuggestions,
+  getPlacesApiKey,
+  type PlaceSuggestion,
+} from "../lib/placesAutocomplete";
 
 interface LocationAutocompleteProps {
   id?: string;
@@ -21,61 +21,70 @@ export function LocationAutocomplete({
   placeholder = "Address, neighbourhood or city",
   className = "",
 }: LocationAutocompleteProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const [placesReady, setPlacesReady] = useState(false);
+  const listboxId = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [placesError, setPlacesError] = useState(false);
-  const hasApiKey = Boolean(getGoogleMapsApiKey());
+  const hasApiKey = Boolean(getPlacesApiKey());
 
   useEffect(() => {
-    if (!hasApiKey) return;
+    if (!hasApiKey || value.trim().length < 2) {
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
 
-    let cancelled = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setLoading(true);
+      setPlacesError(false);
 
-    loadGoogleMaps()
-      ?.then(() => {
-        if (cancelled || !inputRef.current) return;
-
-        const autocomplete = new google.maps.places.Autocomplete(
-          inputRef.current,
-          {
-            componentRestrictions: { country: "ca" },
-            fields: ["formatted_address", "address_components", "name", "geometry"],
-            types: ["geocode"],
-          },
-        );
-
-        autocomplete.addListener("place_changed", () => {
-          const place = autocomplete.getPlace();
-          const formatted = formatPlaceForIntake(place);
-          if (formatted) onChange(formatted);
-        });
-
-        autocompleteRef.current = autocomplete;
-        setPlacesReady(true);
-      })
-      .catch(() => {
-        if (!cancelled) setPlacesError(true);
-      });
+      try {
+        const results = await fetchPlaceSuggestions(value);
+        if (controller.signal.aborted) return;
+        setSuggestions(results);
+        setOpen(results.length > 0);
+      } catch {
+        if (!controller.signal.aborted) {
+          setSuggestions([]);
+          setOpen(false);
+          setPlacesError(true);
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }, 300);
 
     return () => {
-      cancelled = true;
-      const ac = autocompleteRef.current;
-      if (ac && window.google?.maps?.event) {
-        google.maps.event.clearInstanceListeners(ac);
-      }
-      autocompleteRef.current = null;
+      controller.abort();
+      window.clearTimeout(timeout);
     };
-  }, [hasApiKey, onChange]);
+  }, [hasApiKey, value]);
 
   useEffect(() => {
-    if (inputRef.current && inputRef.current.value !== value) {
-      inputRef.current.value = value;
-    }
-  }, [value]);
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
+
+  const handleSelect = (suggestion: PlaceSuggestion) => {
+    const formatted = suggestion.secondary
+      ? `${suggestion.label}, ${suggestion.secondary}`
+      : suggestion.label;
+    onChange(formatted);
+    setOpen(false);
+    setSuggestions([]);
+  };
 
   return (
-    <div>
+    <div ref={containerRef}>
       <div className="relative">
         <span
           className="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center"
@@ -83,36 +92,71 @@ export function LocationAutocomplete({
         >
           <MapPin
             className={`h-4 w-4 ${
-              placesReady ? "text-brand-accent" : "text-slate-400"
+              hasApiKey && !placesError ? "text-brand-accent" : "text-slate-400"
             }`}
           />
         </span>
         <input
-          ref={inputRef}
           id={id}
           type="text"
-          defaultValue={value}
+          value={value}
           placeholder={placeholder}
-          onInput={(e) => onChange(e.currentTarget.value)}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => {
+            if (suggestions.length > 0) setOpen(true);
+          }}
           autoComplete="off"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={listboxId}
+          aria-autocomplete="list"
           className={`w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent ${className}`}
         />
+        {open && suggestions.length > 0 ? (
+          <ul
+            id={listboxId}
+            role="listbox"
+            className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          >
+            {suggestions.map((suggestion) => (
+              <li key={suggestion.placeId} role="option">
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleSelect(suggestion)}
+                  className="block w-full px-3 py-2 text-left hover:bg-purple-50"
+                >
+                  <span className="block text-sm font-medium text-slate-900">
+                    {suggestion.label}
+                  </span>
+                  {suggestion.secondary ? (
+                    <span className="block text-xs text-slate-500">
+                      {suggestion.secondary}
+                    </span>
+                  ) : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
-      {hasApiKey && placesReady && (
+      {hasApiKey && !placesError ? (
         <p className="mt-1 text-xs text-slate-500">
-          Start typing for Ontario address suggestions
+          {loading
+            ? "Looking up addresses…"
+            : "Start typing for Ontario address suggestions"}
         </p>
-      )}
-      {!hasApiKey && (
+      ) : null}
+      {!hasApiKey ? (
         <p className="mt-1 text-xs text-slate-400">
           Add VITE_GOOGLE_MAPS_API_KEY to enable address autofill
         </p>
-      )}
-      {placesError && (
+      ) : null}
+      {placesError ? (
         <p className="mt-1 text-xs text-amber-700">
           Address suggestions unavailable — enter location manually
         </p>
-      )}
+      ) : null}
     </div>
   );
 }
