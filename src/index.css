@@ -120,6 +120,7 @@ body {
 /* Google Places autocomplete dropdown */
 .pac-container {
   z-index: 10000 !important;
+  pointer-events: auto !important;
   border-radius: 0.5rem;
   border: 1px solid #e2e8f0;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);

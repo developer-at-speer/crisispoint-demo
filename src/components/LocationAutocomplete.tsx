@@ -41,7 +41,7 @@ export function LocationAutocomplete({
           {
             componentRestrictions: { country: "ca" },
             fields: ["formatted_address", "address_components", "name", "geometry"],
-            types: ["geocode", "establishment"],
+            types: ["geocode"],
           },
         );
 
@@ -93,7 +93,7 @@ export function LocationAutocomplete({
           type="text"
           defaultValue={value}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          onInput={(e) => onChange(e.currentTarget.value)}
           autoComplete="off"
           className={`w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent ${className}`}
         />
