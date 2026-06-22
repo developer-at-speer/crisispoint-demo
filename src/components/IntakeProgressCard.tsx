@@ -22,15 +22,15 @@ function ProgressItem({
 }: ProgressItemProps) {
   const clickable = !muted && sectionId && onNavigate;
 
-  const content = (
-    <>
+  const inner = (
+    <div className="flex items-start gap-3">
       {!hideDot && dotColor ? (
         <span
-          className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotColor}`}
+          className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${dotColor}`}
           aria-hidden="true"
         />
       ) : (
-        <span className="mt-1.5 w-2 shrink-0" aria-hidden="true" />
+        <span className="mt-1 w-2.5 shrink-0" aria-hidden="true" />
       )}
       <div>
         <p
@@ -40,15 +40,17 @@ function ProgressItem({
         </p>
         <p className="text-xs text-slate-500">{meta}</p>
       </div>
-    </>
+    </div>
   );
 
   if (!clickable) {
     return (
       <div
-        className={`flex items-start gap-3 py-2 ${muted ? "opacity-50" : ""}`}
+        className={`rounded-lg border border-slate-200 bg-white px-3 py-3 ${
+          muted ? "opacity-50" : ""
+        }`}
       >
-        {content}
+        {inner}
       </div>
     );
   }
@@ -57,9 +59,9 @@ function ProgressItem({
     <button
       type="button"
       onClick={() => onNavigate(sectionId)}
-      className="flex w-full items-start gap-3 rounded-lg px-1 py-2 text-left transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-left transition-colors hover:border-brand-accent/40 hover:bg-purple-50/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
     >
-      {content}
+      {inner}
     </button>
   );
 }
@@ -74,11 +76,7 @@ export function IntakeProgressCard({
   onNavigateToSection,
 }: IntakeProgressCardProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        Intake progress
-      </h3>
-
+    <div className="space-y-2">
       <ProgressItem
         title="Safety"
         meta="Tier 0 · always asked"
@@ -87,10 +85,17 @@ export function IntakeProgressCard({
         onNavigate={onNavigateToSection}
       />
       <ProgressItem
-        title="Survivor details & service needs"
+        title="Survivor details"
         meta="Tier 1 · fast path"
         dotColor="bg-green-500"
-        sectionId={INTAKE_SECTION_IDS.survivorNeeds}
+        sectionId={INTAKE_SECTION_IDS.survivorDetails}
+        onNavigate={onNavigateToSection}
+      />
+      <ProgressItem
+        title="Service needs"
+        meta="Tier 1 · fast path"
+        dotColor="bg-green-500"
+        sectionId={INTAKE_SECTION_IDS.serviceNeeds}
         onNavigate={onNavigateToSection}
       />
 
@@ -102,7 +107,7 @@ export function IntakeProgressCard({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={transitions.standard}
-            className="overflow-hidden"
+            className="space-y-2 overflow-hidden"
           >
             <ProgressItem
               title="Incident details"
@@ -114,7 +119,7 @@ export function IntakeProgressCard({
             <ProgressItem
               title="Broader context"
               meta="Tier 3 · only if appropriate"
-              hideDot
+              dotColor="bg-slate-300"
               sectionId={INTAKE_SECTION_IDS.broaderContext}
               onNavigate={onNavigateToSection}
             />
@@ -126,7 +131,7 @@ export function IntakeProgressCard({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={transitions.standard}
-            className="overflow-hidden"
+            className="space-y-2 overflow-hidden"
           >
             <ProgressItem
               title="Incident details"
@@ -137,7 +142,7 @@ export function IntakeProgressCard({
             <ProgressItem
               title="Broader context"
               meta="Hidden in emergency mode"
-              hideDot
+              dotColor="bg-slate-300"
               muted
             />
           </motion.div>

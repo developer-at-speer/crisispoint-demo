@@ -5,7 +5,8 @@ export const CASE_NUMBER = "CP-2024-817";
 
 export const INTAKE_SECTION_IDS = {
   safety: "intake-section-safety",
-  survivorNeeds: "intake-section-survivor-needs",
+  survivorDetails: "intake-section-survivor-details",
+  serviceNeeds: "intake-section-service-needs",
   incidentDetails: "intake-section-incident-details",
   broaderContext: "intake-section-broader-context",
 } as const;
@@ -31,6 +32,8 @@ export function createEmptyIntakeState(): IntakeState {
     survivorNeeds: {
       preferredName: "",
       location: "",
+      estimatedAge: "",
+      genderIdentity: "",
       serviceTypes: [],
       servicePreference: null,
       needs: [],
@@ -45,7 +48,6 @@ export function createEmptyIntakeState(): IntakeState {
       protectionOrder: null,
     },
     broaderContext: {
-      estimatedAge: "",
       childrenAccompanying: "",
       supportNetwork: "",
       contactedBefore: null,
@@ -70,6 +72,8 @@ export const initialState: IntakeState = {
   survivorNeeds: {
     preferredName: "Jessica",
     location: "",
+    estimatedAge: "",
+    genderIdentity: "",
     serviceTypes: ["Counselling", "Emergency Housing"],
     servicePreference: "women_only",
     needs: [],
@@ -86,7 +90,6 @@ export const initialState: IntakeState = {
   },
 
   broaderContext: {
-    estimatedAge: "",
     childrenAccompanying: "",
     supportNetwork: "",
     contactedBefore: "yes",
@@ -142,7 +145,7 @@ export const JUMP_TARGET_GROUP_ORDER: JumpTargetGroup[] = [
 
 export const jumpTargets: JumpTarget[] = [
   { id: "safeToTalk", label: "Is it safe right now?", group: "SAFETY" },
-  { id: "safeToCallBack", label: "Safe to Disclose?", group: "SAFETY" },
+  { id: "safeToCallBack", label: "Safe to disclose?", group: "SAFETY" },
   { id: "callbackNumber", label: "Callback Number", group: "SAFETY" },
   { id: "callbackTime", label: "Callback Time", group: "SAFETY" },
   { id: "preferredName", label: "First Name", group: "SURVIVOR DETAILS" },

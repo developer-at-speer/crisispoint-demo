@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCase } from "../context/CaseContext";
+import { EndCallModal } from "./EndCallModal";
 import { SaveCloseCaseModal } from "./SaveCloseCaseModal";
 
 function OperatorAvatar({ name }: { name: string }) {
@@ -17,7 +18,17 @@ function OperatorAvatar({ name }: { name: string }) {
 }
 
 export function AppHeader() {
-  const { caseId, callLinkedToCase, endCall, addActivityEvent } = useCase();
+  const {
+    caseId,
+    callLinkedToCase,
+    endCallModalOpen,
+    endedCallDurationSeconds,
+    openEndCallModal,
+    continueAfterEndCall,
+    saveAndEndSession,
+    saveAndCloseCase,
+    addActivityEvent,
+  } = useCase();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -25,6 +36,7 @@ export function AppHeader() {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
 
   const handleSaveClose = () => {
+    saveAndCloseCase();
     addActivityEvent({
       timestamp: new Date().toLocaleTimeString([], {
         hour: "numeric",
@@ -35,6 +47,11 @@ export function AppHeader() {
       description: `Case #${caseId} intake saved to operator workspace.`,
       actor: "Operator",
     });
+  };
+
+  const handleSaveAndEndSession = () => {
+    saveAndEndSession();
+    navigate("/dashboard");
   };
 
   return (
@@ -70,7 +87,7 @@ export function AppHeader() {
           {onCaseRoute && callLinkedToCase && (
             <button
               type="button"
-              onClick={endCall}
+              onClick={openEndCallModal}
               className="flex items-center gap-2 rounded-md bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
             >
               <PhoneOff className="h-4 w-4" />
@@ -108,6 +125,13 @@ export function AppHeader() {
         caseId={caseId}
         onClose={() => setSaveModalOpen(false)}
         onConfirm={handleSaveClose}
+      />
+
+      <EndCallModal
+        open={endCallModalOpen}
+        callDurationSeconds={endedCallDurationSeconds}
+        onContinue={continueAfterEndCall}
+        onSaveAndEnd={handleSaveAndEndSession}
       />
     </>
   );

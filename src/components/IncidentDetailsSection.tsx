@@ -132,7 +132,7 @@ export function IncidentDetailsSection({
 
         <TriStateRadio
           name="accessToLocation"
-          label="Does the person have access to her current location or devices?"
+          label="Does the person responsible have access to the survivor's current location or devices?"
           value={incidentDetails.accessToLocationOrDevices}
           options={triOptions}
           onChange={(v) =>

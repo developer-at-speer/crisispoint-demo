@@ -6,7 +6,7 @@ import { IncomingCallModal } from "../components/IncomingCallModal";
 import { PageTransition } from "../components/PageTransition";
 import { SystemStatusWidget } from "../components/SystemStatusWidget";
 import { useCase } from "../context/CaseContext";
-import { dashboardCases, dashboardStats } from "../data/dashboard";
+import { dashboardStats } from "../data/dashboard";
 import { CASE_NUMBER } from "../data/constants";
 
 export function DashboardPage() {
@@ -21,27 +21,34 @@ export function DashboardPage() {
     dismissIncomingCall,
     markCallResolved,
     createFollowUpFromCall,
+    dashboardCases,
+    dashboardRingToken,
   } = useCase();
-  const hasRung = useRef(false);
   const ringWaitingCallRef = useRef(ringWaitingCall);
   ringWaitingCallRef.current = ringWaitingCall;
 
   useEffect(() => {
-    if (hasRung.current) return;
-    if (phoneCalls.some((c) => c.status === "waiting")) {
-      hasRung.current = true;
-      return;
-    }
+    if (dashboardRingToken > 0) return;
+    if (phoneCalls.some((c) => c.status === "waiting")) return;
 
     const timeout = window.setTimeout(() => {
-      hasRung.current = true;
       ringWaitingCallRef.current();
-    }, 2500);
+    }, 1000);
 
     return () => window.clearTimeout(timeout);
-    // Run once when the dashboard mounts — not on every call timer tick.
+    // First dashboard visit only — save-and-close uses dashboardRingToken instead.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (dashboardRingToken === 0) return;
+
+    const timeout = window.setTimeout(() => {
+      ringWaitingCallRef.current();
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [dashboardRingToken]);
 
   const incomingCall = useMemo(
     () => phoneCalls.find((call) => call.id === incomingCallId) ?? null,

@@ -6,7 +6,8 @@ import { BroaderContextSection } from "./BroaderContextSection";
 import { EmergencyModeBanner } from "./EmergencyModeBanner";
 import { IncidentDetailsSection } from "./IncidentDetailsSection";
 import { SafetySection } from "./SafetySection";
-import { SurvivorNeedsSection } from "./SurvivorNeedsSection";
+import { ServiceNeedsSection } from "./ServiceNeedsSection";
+import { SurvivorDetailsSection } from "./SurvivorDetailsSection";
 
 interface IntakeFormProps {
   intake: IntakeState;
@@ -46,9 +47,15 @@ export function IntakeForm({
           highlightedField={highlightedField}
         />
 
-        <SurvivorNeedsSection
+        <SurvivorDetailsSection
           survivorNeeds={intake.survivorNeeds}
           consentStatus={intake.consentStatus}
+          onChange={(survivorNeeds) => update({ survivorNeeds })}
+          highlightedField={highlightedField}
+        />
+
+        <ServiceNeedsSection
+          survivorNeeds={intake.survivorNeeds}
           onChange={(survivorNeeds) => update({ survivorNeeds })}
           highlightedField={highlightedField}
         />

@@ -57,7 +57,7 @@ export function SafetySection({
             id="safeToCallBack"
             className={highlightedField === "safeToCallBack" ? "field-highlight" : undefined}
             name="safeToCallBack"
-            label="Safe to Call Back?"
+            label="Safe to disclose?"
             value={safety.safeToCallBack}
             options={yesNoOptions}
             onChange={(v) =>
@@ -119,7 +119,7 @@ export function SafetySection({
 
         <TriStateRadio
           name="dependentsPresent"
-          label="Are there children / dependents with her right now?"
+          label="Are there children / dependents accompanying the survivor?"
           value={safety.dependentsPresent}
           options={triOptions}
           onChange={(v) =>

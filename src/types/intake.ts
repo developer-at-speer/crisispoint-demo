@@ -17,6 +17,8 @@ export interface IntakeState {
   survivorNeeds: {
     preferredName: string;
     location: string;
+    estimatedAge: string;
+    genderIdentity: string;
     serviceTypes: string[];
     servicePreference: "women_only" | "mixed_family" | "no_preference" | null;
     needs: string[];
@@ -33,7 +35,6 @@ export interface IntakeState {
   };
 
   broaderContext: {
-    estimatedAge: string;
     childrenAccompanying: string;
     supportNetwork: string;
     contactedBefore: TriState;

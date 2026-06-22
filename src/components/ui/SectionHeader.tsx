@@ -1,18 +1,21 @@
+import type { ConsentStatus } from "../../types/intake";
+
 interface SectionHeaderProps {
   title: string;
   tier: string;
   tierVariant?: "urgent" | "normal" | "muted";
-  sharingStatus?: "granted" | "declined";
+  sharingStatus?: ConsentStatus;
+  headerTintClass?: string;
 }
 
 const sharingStatusConfig = {
   granted: {
     message: "This information will be shared",
-    className: "text-green-600",
+    className: "text-sm font-semibold text-green-700",
   },
   declined: {
     message: "This information won't be shared",
-    className: "text-red-600",
+    className: "text-sm font-semibold text-red-700",
   },
 };
 
@@ -21,6 +24,7 @@ export function SectionHeader({
   tier,
   tierVariant = "normal",
   sharingStatus,
+  headerTintClass = "border-slate-200 bg-white",
 }: SectionHeaderProps) {
   const tierStyles = {
     urgent: "bg-red-50 text-red-700 border-red-100",
@@ -30,7 +34,7 @@ export function SectionHeader({
 
   return (
     <div
-      className="sticky z-10 -mx-6 mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-200 bg-white px-6 pb-4 pt-5"
+      className={`sticky z-10 -mx-6 mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-b px-6 pb-4 pt-5 ${headerTintClass}`}
       style={{ top: "var(--intake-sticky-offset, 8.5rem)" }}
     >
       <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
@@ -39,10 +43,8 @@ export function SectionHeader({
       >
         {tier}
       </span>
-      {sharingStatus ? (
-        <span
-          className={`ml-auto text-sm font-semibold ${sharingStatusConfig[sharingStatus].className}`}
-        >
+      {sharingStatus === "granted" || sharingStatus === "declined" ? (
+        <span className={`ml-auto ${sharingStatusConfig[sharingStatus].className}`}>
           {sharingStatusConfig[sharingStatus].message}
         </span>
       ) : null}

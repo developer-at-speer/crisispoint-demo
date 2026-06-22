@@ -1,4 +1,5 @@
 import type { TriState } from "../../types/intake";
+import { SquareControl } from "./SquareControl";
 
 interface TriStateRadioProps {
   id?: string;
@@ -45,7 +46,7 @@ export function TriStateRadio({
           return (
             <label
               key={opt.value}
-              className={`flex cursor-pointer items-center gap-2 text-sm transition-colors ${
+              className={`flex cursor-pointer items-center gap-2.5 text-sm transition-colors ${
                 selected ? "font-medium text-slate-900" : "text-slate-600"
               }`}
             >
@@ -57,30 +58,7 @@ export function TriStateRadio({
                 onChange={() => onChange(opt.value)}
                 className="sr-only"
               />
-              <span
-                className={`flex h-5 w-5 items-center justify-center rounded border transition-all duration-[120ms] ${
-                  selected
-                    ? "border-brand-accent bg-brand-accent"
-                    : "border-slate-300 bg-white"
-                }`}
-                aria-hidden="true"
-              >
-                {selected && (
-                  <svg
-                    className="h-3 w-3 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-              </span>
+              <SquareControl selected={selected} />
               {opt.label}
             </label>
           );

@@ -13,11 +13,17 @@ import {
   waitingCallTemplate,
 } from "../data/callQueue";
 import { CASE_NUMBER, createEmptyIntakeState, initialState } from "../data/constants";
+import {
+  buildDashboardCaseList,
+  getCaseSnapshot,
+  persistCaseSnapshot,
+} from "../lib/caseCache";
 import type { ActivityEvent } from "../types/activity";
 import type { Attachment } from "../types/attachments";
 import type { PhoneCall } from "../types/call";
 import type { IntakeState, SendState } from "../types/intake";
 import type { CaseMessage } from "../types/messages";
+import type { DashboardCaseListItem, SavedCaseSnapshot } from "../types/savedCase";
 
 const initialActivity: ActivityEvent[] = [
   {
@@ -89,12 +95,20 @@ interface CaseContextValue {
   incomingCallId: string | null;
   createIntakeFromCall: (callId: string) => string;
   loadCase: (targetCaseId: string) => void;
+  saveCurrentCase: () => void;
+  saveAndCloseCase: () => void;
+  dashboardCases: DashboardCaseListItem[];
+  dashboardRingToken: number;
   ringWaitingCall: () => void;
   dismissIncomingCall: () => void;
   markCallResolved: (callId: string) => void;
   createFollowUpFromCall: (callId: string) => string;
   callLinkedToCase: PhoneCall | null;
-  endCall: () => void;
+  endCallModalOpen: boolean;
+  endedCallDurationSeconds: number;
+  openEndCallModal: () => void;
+  continueAfterEndCall: () => void;
+  saveAndEndSession: () => void;
   activityEvents: ActivityEvent[];
   addActivityEvent: (event: Omit<ActivityEvent, "id">) => void;
   messages: CaseMessage[];
@@ -116,9 +130,53 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [consentHighlight, setConsentHighlight] = useState(false);
   const [phoneCalls, setPhoneCalls] = useState<PhoneCall[]>(initialPhoneCalls);
   const [incomingCallId, setIncomingCallId] = useState<string | null>(null);
+  const [endCallModalOpen, setEndCallModalOpen] = useState(false);
+  const [endedCallDurationSeconds, setEndedCallDurationSeconds] = useState(0);
   const [activityEvents, setActivityEvents] = useState(initialActivity);
   const [messages, setMessages] = useState(initialMessages);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [dashboardCases, setDashboardCases] = useState<DashboardCaseListItem[]>(
+    () => buildDashboardCaseList(null),
+  );
+  const [dashboardRingToken, setDashboardRingToken] = useState(0);
+
+  const persistCurrentCase = useCallback((): SavedCaseSnapshot => {
+    const snapshot: SavedCaseSnapshot = {
+      caseId,
+      intake: JSON.parse(JSON.stringify(intake)) as IntakeState,
+      referralQueue: [...referralQueue],
+      sendState,
+      savedAt: new Date().toISOString(),
+    };
+    persistCaseSnapshot(snapshot);
+    setDashboardCases(buildDashboardCaseList(caseId));
+    return snapshot;
+  }, [caseId, intake, referralQueue, sendState]);
+
+  const saveCurrentCase = useCallback(() => {
+    persistCurrentCase();
+  }, [persistCurrentCase]);
+
+  const completeLinkedCall = useCallback(() => {
+    setPhoneCalls((prev) =>
+      prev.map((call) =>
+        call.linkedCaseId === caseId && call.status === "linked_to_intake"
+          ? { ...call, status: "completed" as const }
+          : call,
+      ),
+    );
+  }, [caseId]);
+
+  const requestDashboardIncomingCall = useCallback(() => {
+    setIncomingCallId(null);
+    setDashboardRingToken((token) => token + 1);
+  }, []);
+
+  const saveAndCloseCase = useCallback(() => {
+    persistCurrentCase();
+    completeLinkedCall();
+    requestDashboardIncomingCall();
+  }, [persistCurrentCase, completeLinkedCall, requestDashboardIncomingCall]);
 
   const addActivityEvent = useCallback((event: Omit<ActivityEvent, "id">) => {
     eventCounter += 1;
@@ -209,11 +267,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   const loadCase = useCallback((targetCaseId: string) => {
     setCaseId(targetCaseId);
-    setIntake(
-      targetCaseId === CASE_NUMBER ? initialState : createEmptyIntakeState(),
-    );
-    setReferralQueue([]);
-    setSendState("idle");
+    const cached = getCaseSnapshot(targetCaseId);
+    if (cached) {
+      setIntake(cached.intake);
+      setReferralQueue(cached.referralQueue);
+      setSendState(cached.sendState);
+    } else if (targetCaseId === CASE_NUMBER) {
+      setIntake(initialState);
+      setReferralQueue([]);
+      setSendState("idle");
+    } else {
+      setIntake(createEmptyIntakeState());
+      setReferralQueue([]);
+      setSendState("idle");
+    }
     setConsentPulse(false);
     setConsentWarning(false);
     setConsentHighlight(false);
@@ -305,7 +372,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     [phoneCalls, caseId],
   );
 
-  const endCall = useCallback(() => {
+  const resetIntakeForm = useCallback(() => {
     setIntake(createEmptyIntakeState());
     setReferralQueue([]);
     setSendState("idle");
@@ -313,23 +380,47 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setConsentWarning(false);
     setConsentHighlight(false);
     setHighlightedField(null);
+  }, []);
 
-    setPhoneCalls((prev) =>
-      prev.map((call) =>
-        call.linkedCaseId === caseId && call.status === "linked_to_intake"
-          ? { ...call, status: "completed" as const }
-          : call,
-      ),
-    );
-
+  const openEndCallModal = useCallback(() => {
+    const duration = callLinkedToCase?.durationSeconds ?? 0;
+    setEndedCallDurationSeconds(duration);
+    setEndCallModalOpen(true);
     addActivityEvent({
       timestamp: nowTime(),
       type: "call_ended",
       title: "Call ended",
-      description: `Case #${caseId} intake cleared for next caller.`,
+      description: `Hotline call disconnected for Case #${caseId}.`,
       actor: "Operator",
     });
-  }, [caseId, addActivityEvent]);
+  }, [callLinkedToCase, caseId, addActivityEvent]);
+
+  const continueAfterEndCall = useCallback(() => {
+    completeLinkedCall();
+    setEndCallModalOpen(false);
+  }, [completeLinkedCall]);
+
+  const saveAndEndSession = useCallback(() => {
+    persistCurrentCase();
+    completeLinkedCall();
+    resetIntakeForm();
+    setEndCallModalOpen(false);
+    requestDashboardIncomingCall();
+    addActivityEvent({
+      timestamp: nowTime(),
+      type: "case_saved",
+      title: "Session saved and ended",
+      description: `Case #${caseId} intake saved. Form cleared for next caller.`,
+      actor: "Operator",
+    });
+  }, [
+    persistCurrentCase,
+    completeLinkedCall,
+    resetIntakeForm,
+    requestDashboardIncomingCall,
+    caseId,
+    addActivityEvent,
+  ]);
 
   const addMessage = useCallback(
     (body: string, channel: "internal" | "agency" = "internal") => {
@@ -394,12 +485,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       incomingCallId,
       createIntakeFromCall,
       loadCase,
+      saveCurrentCase,
+      saveAndCloseCase,
+      dashboardCases,
+      dashboardRingToken,
       ringWaitingCall,
       dismissIncomingCall,
       markCallResolved,
       createFollowUpFromCall,
       callLinkedToCase,
-      endCall,
+      endCallModalOpen,
+      endedCallDurationSeconds,
+      openEndCallModal,
+      continueAfterEndCall,
+      saveAndEndSession,
       activityEvents,
       addActivityEvent,
       messages,
@@ -420,12 +519,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       incomingCallId,
       createIntakeFromCall,
       loadCase,
+      saveCurrentCase,
+      saveAndCloseCase,
+      dashboardCases,
+      dashboardRingToken,
       ringWaitingCall,
       dismissIncomingCall,
       markCallResolved,
       createFollowUpFromCall,
       callLinkedToCase,
-      endCall,
+      endCallModalOpen,
+      endedCallDurationSeconds,
+      openEndCallModal,
+      continueAfterEndCall,
+      saveAndEndSession,
       activityEvents,
       addActivityEvent,
       messages,

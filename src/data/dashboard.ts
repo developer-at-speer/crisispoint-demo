@@ -7,7 +7,7 @@ export const dashboardStats = [
   { label: "Draft Intakes", value: 1, detail: "incomplete intake" },
 ];
 
-export const dashboardCases = [
+export const seedDashboardCases = [
   {
     id: CASE_NUMBER,
     label: `Case #${CASE_NUMBER}`,

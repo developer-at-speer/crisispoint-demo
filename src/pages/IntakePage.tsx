@@ -1,11 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
-import { HoverScrollArea } from "../components/ui/HoverScrollArea";
 import { CaseNotesCard } from "../components/CaseNotesCard";
-import { ConsentCard } from "../components/ConsentCard";
 import { FieldJumpCommand } from "../components/FieldJumpCommand";
 import { IntakeForm } from "../components/IntakeForm";
-import { IntakeProgressCard } from "../components/IntakeProgressCard";
 import { IntakeShell } from "../components/IntakeShell";
+import { NavigateIntakePanel } from "../components/NavigateIntakePanel";
 import { ReferralMatcher } from "../components/ReferralMatcher";
 import { ReferralQueue } from "../components/ReferralQueue";
 import { ServiceInfoModal } from "../components/ServiceInfoModal";
@@ -163,26 +161,18 @@ export function IntakePage() {
   return (
     <>
       <IntakeShell
-        contextPanel={
-          <>
-            <HoverScrollArea label="Intake progress" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
-              <IntakeProgressCard
-                emergencyMode={intake.emergencyMode}
-                onNavigateToSection={handleSectionNavigate}
-              />
-            </HoverScrollArea>
-            <HoverScrollArea label="Case notes" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
-              <CaseNotesCard saveLabel={saveLabel} caseId={caseId} />
-            </HoverScrollArea>
-            <HoverScrollArea label="Consent" maxHeight="calc((100vh - 5rem) / 3 - 0.75rem)">
-              <ConsentCard
-                consentStatus={intake.consentStatus}
-                onConsentChange={handleConsentChange}
-                pulse={consentPulse}
-                highlighted={highlightedField === "consent"}
-              />
-            </HoverScrollArea>
-          </>
+        navigatePanel={
+          <NavigateIntakePanel
+            emergencyMode={intake.emergencyMode}
+            consentStatus={intake.consentStatus}
+            onNavigateToSection={handleSectionNavigate}
+            onConsentChange={handleConsentChange}
+            consentPulse={consentPulse}
+            consentHighlighted={highlightedField === "consent"}
+          />
+        }
+        notesPanel={
+          <CaseNotesCard saveLabel={saveLabel} caseId={caseId} />
         }
         mainContent={
           <IntakeForm

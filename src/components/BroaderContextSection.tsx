@@ -34,29 +34,10 @@ export function BroaderContextSection({
       <div className="space-y-6">
         <div className="form-question">
           <label
-            htmlFor="estimated-age"
-            className="mb-1.5 block text-sm font-medium text-slate-600"
-          >
-            Age estimated
-          </label>
-          <input
-            id="estimated-age"
-            type="text"
-            placeholder="Years"
-            value={broaderContext.estimatedAge}
-            onChange={(e) =>
-              onChange({ ...broaderContext, estimatedAge: e.target.value })
-            }
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div className="form-question">
-          <label
             htmlFor="children-accompanying"
-            className="mb-1.5 block text-sm font-medium text-slate-600"
+            className="mb-2.5 block text-sm font-medium text-slate-600"
           >
-            Children accompanying her (number / ages)
+            Children accompanying the survivor (number / ages)
           </label>
           <input
             id="children-accompanying"
@@ -69,14 +50,14 @@ export function BroaderContextSection({
                 childrenAccompanying: e.target.value,
               })
             }
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm"
           />
         </div>
 
         <div className="form-question">
           <label
             htmlFor="support-network"
-            className="mb-1.5 block text-sm font-medium text-slate-600"
+            className="mb-2.5 block text-sm font-medium text-slate-600"
           >
             Existing support network for tonight
           </label>
@@ -88,7 +69,7 @@ export function BroaderContextSection({
             onChange={(e) =>
               onChange({ ...broaderContext, supportNetwork: e.target.value })
             }
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm"
           />
         </div>
 
@@ -96,7 +77,7 @@ export function BroaderContextSection({
           id="contactedBefore"
           className={highlightedField === "contactedBefore" ? "field-highlight" : undefined}
           name="contactedBefore"
-          label="Has she contacted the hotline before?"
+          label="Has the survivor contacted the hotline before?"
           value={broaderContext.contactedBefore}
           options={triOptions}
           onChange={(v) =>
