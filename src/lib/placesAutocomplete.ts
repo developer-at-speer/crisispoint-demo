@@ -26,6 +26,7 @@ type AutocompleteResponse = {
 
 export async function fetchPlaceSuggestions(
   input: string,
+  signal?: AbortSignal,
 ): Promise<PlaceSuggestion[]> {
   const apiKey = getPlacesApiKey();
   if (!apiKey || input.trim().length < 2) return [];
@@ -42,6 +43,7 @@ export async function fetchPlaceSuggestions(
         input: input.trim(),
         includedRegionCodes: ["ca"],
       }),
+      signal,
     },
   );
 

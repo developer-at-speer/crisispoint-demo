@@ -11,15 +11,9 @@ import { ReferralQueue } from "../components/ReferralQueue";
 import { ServiceInfoModal } from "../components/ServiceInfoModal";
 import { useCase } from "../context/CaseContext";
 import { agencies } from "../data/agencies";
-import { INTAKE_SECTION_IDS, CASE_NUMBER } from "../data/constants";
+import { INTAKE_SECTION_IDS } from "../data/constants";
 import { useEmergencyMode } from "../hooks/useEmergencyMode";
 import { scrollToIntakeElement } from "../lib/scroll";
-
-const demoNotes = [
-  "Client seems hesitant",
-  "Mentioned sister as potential safe contact",
-  "Prior shelter contact approximately two years ago",
-];
 
 export function IntakePage() {
   const navigate = useNavigate();
@@ -53,13 +47,11 @@ export function IntakePage() {
     INTAKE_SECTION_IDS.safety,
   );
   const [notesExpanded, setNotesExpanded] = useState(false);
-  const [caseNotes, setCaseNotes] = useState(
-    () => (caseId === CASE_NUMBER ? demoNotes.join("\n\n") : ""),
-  );
+  const [caseNotes, setCaseNotes] = useState("");
   const { toggleEmergencyMode } = useEmergencyMode(intake, setIntake);
 
   useEffect(() => {
-    setCaseNotes(caseId === CASE_NUMBER ? demoNotes.join("\n\n") : "");
+    setCaseNotes("");
     setNotesExpanded(false);
   }, [caseId]);
 
