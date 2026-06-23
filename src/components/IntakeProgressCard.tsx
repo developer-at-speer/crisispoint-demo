@@ -26,7 +26,7 @@ function ProgressItem({
 }: ProgressItemProps) {
   const clickable = !muted && sectionId && onNavigate;
 
-  const rowClass = `w-full px-3 py-2.5 text-left transition-colors ${
+  const rowClass = `w-full px-4 py-3.5 text-left transition-colors ${
     active ? "bg-purple-50" : clickable ? "hover:bg-slate-50" : ""
   } ${!isLast ? "border-b border-slate-100" : ""} ${muted ? "opacity-50" : ""}`;
 
@@ -42,7 +42,7 @@ function ProgressItem({
       )}
       <div>
         <p
-          className={`text-sm font-medium ${muted ? "text-slate-400" : "text-slate-800"}`}
+          className={`text-sm font-semibold ${muted ? "text-slate-400" : "text-slate-900"}`}
         >
           {title}
         </p>
@@ -79,10 +79,8 @@ export function IntakeProgressCard({
 }: IntakeProgressCardProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-3 py-2.5">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Navigate intake
-        </h2>
+      <div className="border-b border-slate-100 px-4 py-3.5">
+        <h2 className="text-sm font-semibold text-slate-900">Navigate intake</h2>
       </div>
 
       <div>

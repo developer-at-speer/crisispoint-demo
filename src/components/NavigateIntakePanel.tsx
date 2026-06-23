@@ -1,13 +1,9 @@
-import { CaseNotesCard } from "./CaseNotesCard";
 import { ConsentCard } from "./ConsentCard";
 import { IntakeProgressCard } from "./IntakeProgressCard";
-import { HoverScrollArea } from "./ui/HoverScrollArea";
 import type { ConsentStatus } from "../types/intake";
-
-const PANEL_MAX_HEIGHT = "calc((100vh - 5rem) / 3 - 0.75rem)";
+import type { ReactNode } from "react";
 
 interface NavigateIntakePanelProps {
-  caseId: string;
   emergencyMode: boolean;
   activeSectionId?: string;
   consentStatus: ConsentStatus;
@@ -15,10 +11,10 @@ interface NavigateIntakePanelProps {
   onConsentChange: (status: "granted" | "declined") => void;
   consentPulse?: boolean;
   consentHighlighted?: boolean;
+  caseNotes?: ReactNode;
 }
 
 export function NavigateIntakePanel({
-  caseId,
   emergencyMode,
   activeSectionId,
   consentStatus,
@@ -26,29 +22,24 @@ export function NavigateIntakePanel({
   onConsentChange,
   consentPulse,
   consentHighlighted,
+  caseNotes,
 }: NavigateIntakePanelProps) {
   return (
-    <>
-      <HoverScrollArea label="Intake progress" maxHeight={PANEL_MAX_HEIGHT}>
-        <IntakeProgressCard
-          emergencyMode={emergencyMode}
-          activeSectionId={activeSectionId}
-          onNavigateToSection={onNavigateToSection}
-        />
-      </HoverScrollArea>
+    <div className="flex flex-col gap-4">
+      <IntakeProgressCard
+        emergencyMode={emergencyMode}
+        activeSectionId={activeSectionId}
+        onNavigateToSection={onNavigateToSection}
+      />
 
-      <HoverScrollArea label="Case notes" maxHeight={PANEL_MAX_HEIGHT}>
-        <CaseNotesCard caseId={caseId} />
-      </HoverScrollArea>
+      {caseNotes}
 
-      <HoverScrollArea label="Consent" maxHeight={PANEL_MAX_HEIGHT}>
-        <ConsentCard
-          consentStatus={consentStatus}
-          onConsentChange={onConsentChange}
-          pulse={consentPulse}
-          highlighted={consentHighlighted}
-        />
-      </HoverScrollArea>
-    </>
+      <ConsentCard
+        consentStatus={consentStatus}
+        onConsentChange={onConsentChange}
+        pulse={consentPulse}
+        highlighted={consentHighlighted}
+      />
+    </div>
   );
 }

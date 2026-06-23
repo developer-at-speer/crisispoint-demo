@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CaseNotesCard } from "../components/CaseNotesCard";
 import { FieldJumpCommand } from "../components/FieldJumpCommand";
 import { IncomingCallModal } from "../components/IncomingCallModal";
 import { IntakeForm } from "../components/IntakeForm";
@@ -10,9 +11,15 @@ import { ReferralQueue } from "../components/ReferralQueue";
 import { ServiceInfoModal } from "../components/ServiceInfoModal";
 import { useCase } from "../context/CaseContext";
 import { agencies } from "../data/agencies";
-import { INTAKE_SECTION_IDS } from "../data/constants";
+import { INTAKE_SECTION_IDS, CASE_NUMBER } from "../data/constants";
 import { useEmergencyMode } from "../hooks/useEmergencyMode";
 import { scrollToIntakeElement } from "../lib/scroll";
+
+const demoNotes = [
+  "Client seems hesitant",
+  "Mentioned sister as potential safe contact",
+  "Prior shelter contact approximately two years ago",
+];
 
 export function IntakePage() {
   const navigate = useNavigate();
@@ -45,7 +52,16 @@ export function IntakePage() {
   const [activeSectionId, setActiveSectionId] = useState<string>(
     INTAKE_SECTION_IDS.safety,
   );
+  const [notesExpanded, setNotesExpanded] = useState(false);
+  const [caseNotes, setCaseNotes] = useState(
+    () => (caseId === CASE_NUMBER ? demoNotes.join("\n\n") : ""),
+  );
   const { toggleEmergencyMode } = useEmergencyMode(intake, setIntake);
+
+  useEffect(() => {
+    setCaseNotes(caseId === CASE_NUMBER ? demoNotes.join("\n\n") : "");
+    setNotesExpanded(false);
+  }, [caseId]);
 
   useEffect(() => {
     if (phoneCalls.some((c) => c.status === "waiting")) return;
@@ -189,12 +205,20 @@ export function IntakePage() {
     [scrollToElement, setHighlightedField],
   );
 
+  const caseNotesCard = (
+    <CaseNotesCard
+      notes={caseNotes}
+      onNotesChange={setCaseNotes}
+      expanded={notesExpanded}
+      onExpandedChange={setNotesExpanded}
+    />
+  );
+
   return (
     <>
       <IntakeShell
         contextPanel={
           <NavigateIntakePanel
-            caseId={caseId}
             emergencyMode={intake.emergencyMode}
             activeSectionId={activeSectionId}
             consentStatus={intake.consentStatus}
@@ -202,8 +226,10 @@ export function IntakePage() {
             onConsentChange={handleConsentChange}
             consentPulse={consentPulse}
             consentHighlighted={highlightedField === "consent"}
+            caseNotes={notesExpanded ? undefined : caseNotesCard}
           />
         }
+        notesPanel={notesExpanded ? caseNotesCard : undefined}
         mainContent={
           <IntakeForm
             intake={intake}
