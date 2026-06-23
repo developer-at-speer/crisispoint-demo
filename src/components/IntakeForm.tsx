@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { IntakeState } from "../types/intake";
 import { transitions } from "../data/constants";
-import { useIntakeStickyOffset } from "../hooks/useIntakeStickyOffset";
 import { BroaderContextSection } from "./BroaderContextSection";
 import { EmergencyModeBanner } from "./EmergencyModeBanner";
 import { IncidentDetailsSection } from "./IncidentDetailsSection";
@@ -22,8 +21,6 @@ export function IntakeForm({
   onToggleEmergency,
   highlightedField,
 }: IntakeFormProps) {
-  useIntakeStickyOffset();
-
   const update = (partial: Partial<IntakeState>) => {
     onIntakeChange({ ...intake, ...partial });
   };
