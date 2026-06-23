@@ -1,6 +1,7 @@
-import { useCallback, useState } from "react";
-import { CaseNotesCard } from "../components/CaseNotesCard";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FieldJumpCommand } from "../components/FieldJumpCommand";
+import { IncomingCallModal } from "../components/IncomingCallModal";
 import { IntakeForm } from "../components/IntakeForm";
 import { IntakeShell } from "../components/IntakeShell";
 import { NavigateIntakePanel } from "../components/NavigateIntakePanel";
@@ -14,6 +15,7 @@ import { useEmergencyMode } from "../hooks/useEmergencyMode";
 import { scrollToIntakeElement } from "../lib/scroll";
 
 export function IntakePage() {
+  const navigate = useNavigate();
   const {
     caseId,
     intake,
@@ -32,6 +34,11 @@ export function IntakePage() {
     consentHighlight,
     setConsentHighlight,
     addActivityEvent,
+    phoneCalls,
+    incomingCallId,
+    ringWaitingCall,
+    dismissIncomingCall,
+    createIntakeFromCall,
   } = useCase();
 
   const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null);
@@ -39,6 +46,32 @@ export function IntakePage() {
     INTAKE_SECTION_IDS.safety,
   );
   const { toggleEmergencyMode } = useEmergencyMode(intake, setIntake);
+
+  useEffect(() => {
+    if (phoneCalls.some((c) => c.status === "waiting")) return;
+
+    const timeout = window.setTimeout(() => {
+      ringWaitingCall();
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+    // Ring once on intake mount for demo presentation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const incomingCall = useMemo(
+    () => phoneCalls.find((call) => call.id === incomingCallId) ?? null,
+    [phoneCalls, incomingCallId],
+  );
+
+  const showIncomingCallModal =
+    incomingCall !== null && incomingCall.status === "waiting";
+
+  const handleAnswerIncomingCall = useCallback(() => {
+    if (!incomingCallId) return;
+    const newCaseId = createIntakeFromCall(incomingCallId);
+    navigate(`/case/${newCaseId}/intake`);
+  }, [incomingCallId, createIntakeFromCall, navigate]);
 
   const handleToggleEmergency = useCallback(() => {
     const next = !intake.emergencyMode;
@@ -159,8 +192,9 @@ export function IntakePage() {
   return (
     <>
       <IntakeShell
-        navigatePanel={
+        contextPanel={
           <NavigateIntakePanel
+            caseId={caseId}
             emergencyMode={intake.emergencyMode}
             activeSectionId={activeSectionId}
             consentStatus={intake.consentStatus}
@@ -170,7 +204,6 @@ export function IntakePage() {
             consentHighlighted={highlightedField === "consent"}
           />
         }
-        notesPanel={<CaseNotesCard caseId={caseId} />}
         mainContent={
           <IntakeForm
             intake={intake}
@@ -210,6 +243,13 @@ export function IntakePage() {
       />
 
       <FieldJumpCommand onJump={handleFieldJump} />
+
+      <IncomingCallModal
+        call={incomingCall}
+        visible={showIncomingCallModal}
+        onAnswer={handleAnswerIncomingCall}
+        onDismiss={dismissIncomingCall}
+      />
     </>
   );
 }

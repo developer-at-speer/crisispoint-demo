@@ -23,7 +23,7 @@ export function SectionHeader({
       className={`sticky z-10 -mx-6 mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-b px-6 pb-4 pt-5 ${headerTintClass}`}
       style={{ top: "var(--intake-sticky-offset, 8.5rem)" }}
     >
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-base font-semibold text-slate-900">{title}</h2>
       <span
         className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tierStyles[tierVariant]}`}
       >

@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 interface EmergencyModeBannerProps {
   emergencyMode: boolean;
   onToggle: () => void;
@@ -8,12 +10,14 @@ export function EmergencyModeBanner({
   onToggle,
 }: EmergencyModeBannerProps) {
   return (
-    <div
-      className={`flex items-center justify-between gap-4 rounded-xl border px-5 py-4 ${
-        emergencyMode
-          ? "border-red-200 bg-red-50"
-          : "border-slate-200 bg-slate-100"
-      }`}
+    <motion.div
+      layout
+      animate={{
+        backgroundColor: emergencyMode ? "#fff1f2" : "#ffffff",
+        borderColor: emergencyMode ? "#ef4444" : "#d1d5db",
+      }}
+      transition={{ duration: 0.2 }}
+      className="flex items-center justify-between gap-4 rounded-xl border px-5 py-4 shadow-sm"
     >
       <div>
         <h2
@@ -34,6 +38,6 @@ export function EmergencyModeBanner({
       >
         {emergencyMode ? "Turn off" : "Turn on"}
       </button>
-    </div>
+    </motion.div>
   );
 }

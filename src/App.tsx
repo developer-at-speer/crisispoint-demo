@@ -12,6 +12,9 @@ import { LoginPage } from "./pages/LoginPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { ResourceMapPage } from "./pages/ResourceMapPage";
+import { CASE_NUMBER } from "./data/constants";
+
+const INTAKE_PATH = `/case/${CASE_NUMBER}/intake`;
 
 export default function App() {
   return (
@@ -23,7 +26,7 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route
                 path="/"
-                element={<Navigate to="/dashboard" replace />}
+                element={<Navigate to={INTAKE_PATH} replace />}
               />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/case/:caseId/intake" element={<IntakePage />} />

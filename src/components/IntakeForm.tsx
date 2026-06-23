@@ -68,7 +68,7 @@ export function IntakeForm({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={transitions.slow}
-              className="space-y-6"
+              className="space-y-6 overflow-hidden"
             >
               <IncidentDetailsSection
                 incidentDetails={intake.incidentDetails}
